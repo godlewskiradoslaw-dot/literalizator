@@ -133,11 +133,19 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 .k.go{max-width:none;flex:2.3;height:46px;font:800 .82rem var(--body);letter-spacing:.03em;background:#6b7280;color:#fff}
 .k.go.ready{background:#12a150}
 .k.del{max-width:none;flex:1.3;font-size:1.1rem}
+.arch{display:flex;flex-direction:column;gap:6px}
+.arch button{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;text-align:left;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:600 .9rem var(--body);cursor:pointer}
+.arch small{display:block;color:var(--muted);font-weight:400;font-size:.75rem;margin-top:2px}
+.arch .dots{letter-spacing:1px;font-size:.9rem;white-space:nowrap}
+.arch .pt{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
+.top{gap:6px}.top .icon{min-width:36px;padding:0 6px}
+.k.go{font-size:.74rem;letter-spacing:0}
+.tag{font-size:.68rem;background:var(--key);color:var(--ink);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
 </style>
 
 <div class="app">
   <div class="top">
-    <button class="icon" id="bHelp" aria-label="Zasady">?</button><button class="icon" id="bSnd" aria-label="Dźwięk">🔊</button>
+    <button class="icon" id="bHelp" aria-label="Zasady">?</button><button class="icon" id="bSnd" aria-label="Dźwięk">🔊</button><button class="icon" id="bArch" aria-label="Archiwum poprzednich dni">📅</button>
     <div class="lvt"><b id="lvName">Poziom 1 z 3</b><small id="lvSub"></small></div>
     <button class="icon" id="bStats" aria-label="Podsumowanie i wyniki">Wyniki</button>
   </div>
@@ -162,7 +170,10 @@ function dayNo(){return Math.round((keyToUTC(todayKey())-START)/DAY)}
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 let mode='day', lvl=0, answer, guesses=[], cur='', done=false, busy=false;
-let day=null, freeLvl=0;
+let day=null, freeLvl=0, archKey=null;
+const curN=()=>mode==='arch'?Math.round((keyToUTC(archKey)-START)/DAY):dayNo();
+const curKey=()=>mode==='arch'?archKey:todayKey();
+const shortDate=k=>{const p=k.split('-');return p[2]+'.'+p[1]};
 
 function score(g,a){
   const r=Array(5).fill('miss'), left={};
@@ -198,11 +209,12 @@ function paint(){
   paintLevels();
 }
 function paintLevels(){
-  const L0=mode==='day'?lvl:freeLvl;
-  $('lvName').textContent=(mode==='day'?'':'Trening · ')+LV[L0].n+(mode==='day'?' z 3':'');
+  const play=mode!=='free', L0=play?lvl:freeLvl;
+  $('lvName').textContent=mode==='arch'?'Archiwum '+shortDate(archKey):(play?'':'Trening · ')+LV[L0].n+(play?' z 3':'');
   const bs=$('bStats');bs.textContent=mode==='day'?'Wyniki':'Wyjdź';bs.classList.toggle('exit',mode!=='day');bs.setAttribute('aria-label',mode==='day'?'Podsumowanie i wyniki':'Wyjdź z treningu');
-  const att=done?(guesses.length&&guesses[guesses.length-1].w===answer?'Odgadnięte':'Hasło: '+answer.toUpperCase()):attemptLabel();
-  $('lvSub').innerHTML=LV[L0].r+' · '+att+(mode==='day'?' · <span style="white-space:nowrap">dziś '+day.pts.reduce((a,b)=>a+b,0)+' pkt</span>':'');
+  const isWon=play?day.res[L0]==='won':(guesses.length&&guesses[guesses.length-1].w===answer);
+  const att=done?(isWon?'Odgadnięte':'Hasło: '+answer.toUpperCase()):attemptLabel();
+  $('lvSub').innerHTML=(mode==='arch'?LV[L0].n+' z 3 · ':'')+LV[L0].r+' · '+att+(play?' · <span style="white-space:nowrap">'+(mode==='day'?'dziś ':'ten dzień ')+day.pts.reduce((a,b)=>a+b,0)+' pkt</span>':'');
 }
 const COL={hit:'#12a150',near:'#ff8a00',miss:'#6b7280'};
 function setImp(el,prop,v){el.style.setProperty(prop,v,'important')}
@@ -256,7 +268,7 @@ function submit(){
   if(!VALID.has(cur)){shake();return toast('Nie ma takiego słowa w słowniku')}
   const s=score(cur,answer);guesses.push({w:cur,s});const won=cur===answer;cur='';
   busy=true;
-  if(mode==='day'){day.g[lvl]=guesses;saveDay()}
+  if(mode!=='free'){day.g[lvl]=guesses;saveDay()}
   paint();
   const tiles=$('board').children[guesses.length-1].children;
   [...tiles].forEach((t,i)=>{t.style.animationDelay=(i*90)+'ms';t.classList.add('rev');SFX.tile(s[i],i*0.09)});
@@ -266,10 +278,10 @@ function submit(){
 function finish(won){
   done=true;
   let p=0;
-  if(mode==='day'){
+  if(mode!=='free'){
     p=won?pointsFor(answer,guesses.length):0;
     day.res[lvl]=won?'won':'lost';day.pts[lvl]=p;saveDay();
-    const h=store.get('sd2_hist',{});h[todayKey()]=day.pts.slice();store.set('sd2_hist',h);
+    const h=store.get('sd2_hist',{});h[curKey()]=day.pts.slice();store.set('sd2_hist',h);
   }
   paint();
   if(won)SFX.win(0);else SFX.lose(0);
@@ -279,8 +291,8 @@ function finish(won){
 function grid(g){return g.map(x=>x.s.map(s=>s==='hit'?'🟩':s==='near'?'🟨':'⬜').join('')).join('\n')}
 function shareText(){
   if(mode==='free'){const won=(guesses.length&&guesses[guesses.length-1].w===answer);return 'Literalizator (trening, '+LV[freeLvl].n.toLowerCase()+') '+(won?guesses.length:'X')+'/6\n\n'+grid(guesses)}
-  let t='Literalizator #'+(dayNo()+1)+' · '+day.pts.reduce((a,b)=>a+b,0)+' pkt\n';
-  day.res.forEach((r,i)=>{if(!r)return;const g=day.g[i];t+='\nP'+(i+1)+': '+(r==='won'?g.length:'X')+'/6 · '+day.pts[i]+' pkt\n'+grid(g)+'\n'});
+  let t='Literalizator #'+(curN()+1)+' · '+day.pts.reduce((a,b)=>a+b,0)+' pkt\n';
+  day.res.forEach((r,i)=>{if(!r)return;const g=day.g[i];t+='\nP'+(i+1)+': '+(r==='won'?(g.length||'✓'):'X')+'/6 · '+day.pts[i]+' pkt\n'+grid(g)+'\n'});
   return t.trim();
 }
 function copy(text){try{navigator.clipboard.writeText(text).then(()=>toast('Skopiowano wynik'),()=>fallback(text))}catch(e){fallback(text)}}
@@ -292,12 +304,12 @@ function showResult(won,p){
   const v=val(answer), word=`<span class="answer">${answer}</span>`;
   let body,btns='';
   const head=won?'Odgadnięte w '+guesses.length+(guesses.length===1?' próbie':' próbach'):'Tym razem się nie udało';
-  if(mode==='day'){
+  if(mode!=='free'){
     body=won?`<p>${word}</p><p>Wartość słowa ${v} pkt × premia ${7-guesses.length} (za ${guesses.length}. próbę) = <b>${p} pkt</b></p>`
-            :`<p>Hasło: ${word} (${v} pkt)</p><p>Tym razem 0 pkt.${lvl<2?' Kolejny poziom odblokujesz jutro.':''}</p>`;
-    body+=`<p class="sub">Dziś razem: <b>${day.pts.reduce((a,b)=>a+b,0)} pkt</b></p>`;
+            :`<p>Hasło: ${word} (${v} pkt)</p><p>Tym razem 0 pkt.${lvl<2?(mode==='arch'?' Kolejne poziomy tego dnia zostają zablokowane.':' Kolejny poziom odblokujesz jutro.'):''}</p>`;
+    body+=`<p class="sub">${mode==='arch'?'Ten dzień razem':'Dziś razem'}: <b>${day.pts.reduce((a,b)=>a+b,0)} pkt</b></p>`;
     btns=(won&&lvl<2)?`<button class="main" id="aNext">Dalej: Poziom ${lvl+2}</button>`:`<button class="main" id="aSum">Podsumowanie dnia</button>`;
-    open(`<div class="step">Strona ${lvl+1} z 4 · ${LV[lvl].n}</div><h2>${head}</h2>${body}<div class="actions">${btns}</div><button class="linkbtn" id="aClose">Pokaż planszę</button>`);
+    open(`<div class="step">${mode==='arch'?'Archiwum '+shortDate(archKey)+' · ':''}Strona ${lvl+1} z 4 · ${LV[lvl].n}</div><h2>${head}</h2>${body}<div class="actions">${btns}</div><button class="linkbtn" id="aClose">Pokaż planszę</button>`);
     if($('aNext'))$('aNext').onclick=()=>{close();lvl++;loadDayLevel()};
     if($('aSum'))$('aSum').onclick=showStats;
   } else {
@@ -307,7 +319,7 @@ function showResult(won,p){
   }
 }
 function trainPicker(){return `<p class="sub">Trening (bez punktów), wybierz poziom:</p><div class="trainlv">${LV.map((l,i)=>`<button data-tl="${i}">${l.n}<br><small>${l.r}</small></button>`).join('')}</div>`}
-function bindTrain(){document.querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{freeLvl=+b.dataset.tl;mode='free';close();newFree()})}
+function bindTrain(){document.querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{if(mode==='arch')loadDay();freeLvl=+b.dataset.tl;mode='free';close();newFree()})}
 function sumRange(h,from,to){let s=0;for(const k in h){const t=keyToUTC(k);if(t>=from&&t<=to)s+=h[k].reduce((a,b)=>a+b,0)}return s}
 function showStats(){
   if(!day)loadDay();
@@ -320,14 +332,14 @@ function showStats(){
   let won=[0,0,0],played=[0,0,0];
   const lg=store.get('sd2_log',{});for(const k in lg)lg[k].forEach((r,i)=>{if(r){played[i]++;if(r==='won')won[i]++}});
   const month=new Date(t).toLocaleDateString('pl-PL',{month:'long',timeZone:'UTC'});
-  const dayRows=LV.map((l,i)=>{const r=day.res[i],g=day.g[i]||[];const n=dayNo(),pool=L[i],w=pool[((n%pool.length)+pool.length)%pool.length];
-    const word=r?w:(unlocked(i)?'…':'🔒');const note=r==='won'?'odgadnięte w '+g.length+'. próbie':r==='lost'?'nie udało się':unlocked(i)?'jeszcze nie rozwiązane':'zablokowane';
+  const dayRows=LV.map((l,i)=>{const r=day.res[i],g=day.g[i]||[];const n=curN(),pool=L[i],w=pool[((n%pool.length)+pool.length)%pool.length];
+    const word=r?w:(unlocked(i)?'…':'🔒');const note=r==='won'?(g.length?'odgadnięte w '+g.length+'. próbie':'odgadnięte'):r==='lost'?'nie udało się':unlocked(i)?'jeszcze nie rozwiązane':'zablokowane';
     return `<div><span>${l.n}</span><span class="w">${word}<small>${note}</small></span><span class="pt">${day.pts[i]} pkt</span></div>`}).join('');
   const allDone=!!(day.res[2]||day.res.includes('lost'));
-  open(`<div class="step">Strona 4 z 4 · Podsumowanie</div><h2>Podsumowanie dnia</h2>
+  open(`<div class="step">${mode==='arch'?'Archiwum · ':''}Strona 4 z 4 · Podsumowanie</div><h2>${mode==='arch'?'Dzień '+shortDate(archKey):'Podsumowanie dnia'}</h2>
   <div class="daysum">${dayRows}</div>
-  <div class="total"><span>Dziś razem</span><span>${day.pts.reduce((a,b)=>a+b,0)} pkt</span></div>
-  <div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${allDone?'Pokaż planszę':'Wróć do haseł dnia'}</button></div>
+  <div class="total"><span>${mode==='arch'?'Ten dzień razem':'Dziś razem'}</span><span>${day.pts.reduce((a,b)=>a+b,0)} pkt</span></div>
+  <div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${mode==='arch'||allDone?'Pokaż planszę':'Wróć do haseł dnia'}</button><button id="aArch">📅 Archiwum</button></div>
   <h2>Twoje punkty</h2>
   <div class="stats"><div><b>${sumRange(h,t,t)}</b><span>dziś</span></div><div><b>${sumRange(h,wFrom,wFrom+6*DAY)}</b><span>ten tydzień</span></div><div><b>${sumRange(h,mFrom,t)}</b><span>${month}</span></div><div><b>${all}</b><span>łącznie</span></div></div>
   <div class="week">${days.map((d,i)=>{const s=d.p[0]+d.p[1]+d.p[2];return `<div>${s||''}<i style="height:${s/mx*80}%">${d.p.map((p,j)=>p?`<s class="c${j+1}" style="height:${p/s*100}%"></s>`:'').join('')}</i>${names[i]}</div>`}).join('')}</div>
@@ -337,13 +349,14 @@ function showStats(){
   <h2>Trening</h2>${trainPicker()}
   <button class="linkbtn" id="aReset">Zacznij od nowa (wyzeruj wyniki)</button>`);
   $('aReset').onclick=askReset;bindTrain();
-  $('aShare').onclick=()=>{const m=mode;mode='day';const t=shareText();mode=m;copy(t)};
-  $('aBack').onclick=()=>{close();if(mode!=='day')setMode('day')};
+  $('aShare').onclick=()=>{const m=mode;if(m==='free')mode='day';const t=shareText();mode=m;copy(t)};
+  $('aBack').onclick=()=>{close();if(mode==='free')setMode('day')};
+  $('aArch').onclick=showArchive;
 }
 function askReset(){
   open(`<h2>Zacząć od nowa?</h2><p>Usunę wszystkie punkty, statystyki i dzisiejsze postępy na wszystkich poziomach. Tego nie da się cofnąć.</p>
   <div class="actions"><button class="main" id="aYes">Tak, wyzeruj</button><button id="aClose">Anuluj</button></div>`);
-  $('aYes').onclick=()=>{['sd2_day','sd2_hist','sd2_log'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  $('aYes').onclick=()=>{['sd2_day','sd2_hist','sd2_log','sd2_arch'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
     close();setMode('day');toast('Wyniki wyzerowane. Powodzenia!',2000)};
 }
 function showHelp(){
@@ -361,19 +374,43 @@ function showHelp(){
   <p>Wynik = wartość słowa × premia za szybkość: 6 za odgadnięcie w 1. próbie, 5 w 2., i tak dalej do 1 w 6. próbie. Przykład: ŻÓŁTY (17 pkt) odgadnięty w 3. próbie daje 17 × 4 = 68 pkt.</p>
   <table class="vals">${Object.keys(groups).sort((a,b)=>a-b).map(v=>`<tr><td>${v} pkt</td><td>${groups[v].join(' ')}</td></tr>`).join('')}</table>
   <p class="sub">Trening (na stronie podsumowania) losuje słowa z wybranego poziomu bez limitu; punkty w treningu się nie liczą.</p>
+  <p class="sub">Archiwum (przycisk 📅 u góry) pozwala zagrać hasła z poprzednich dni. Punkty liczą się do dnia, którego dotyczą.</p>
   <div class="actions"><button class="main" id="aClose">Gramy</button></div>`);
 }
-function saveDay(){store.set('sd2_day',day);const lg=store.get('sd2_log',{});lg[todayKey()]=day.res;store.set('sd2_log',lg)}
+function saveDay(){const k=curKey();
+  if(mode==='arch'){const a=store.get('sd2_arch',{});day.late=true;a[k]=day;store.set('sd2_arch',a)}else store.set('sd2_day',day);
+  const lg=store.get('sd2_log',{});lg[k]=day.res;store.set('sd2_log',lg)}
 function loadDay(){
   const s=store.get('sd2_day',null);
+  // poprzedni dzień (np. niedokończony) przenosimy do archiwum, żeby dało się go dograć
+  if(s&&typeof s.d==='number'&&s.d>=0&&s.d<dayNo()){const k=utcToKey(START+s.d*DAY),a=store.get('sd2_arch',{});if(!a[k]){a[k]={g:s.g,res:s.res,pts:s.pts};store.set('sd2_arch',a)}}
   day=(s&&s.d===dayNo())?s:{d:dayNo(),g:[[],[],[]],res:[null,null,null],pts:[0,0,0]};
   lvl=day.res[0]!=='won'?0:day.res[1]!=='won'?1:2;
   if(day.res[lvl]==='lost'&&lvl>0)lvl=lvl;
 }
 function loadDayLevel(){
-  const n=dayNo(),pool=L[lvl];answer=pool[((n%pool.length)+pool.length)%pool.length];
+  const n=curN(),pool=L[lvl];answer=pool[((n%pool.length)+pool.length)%pool.length];
   guesses=day.g[lvl]||[];done=!!day.res[lvl];cur='';paint();
   
+}
+// ---- Archiwum poprzednich dni
+function loadArch(k){const a=store.get('sd2_arch',{}),lg=store.get('sd2_log',{}),h=store.get('sd2_hist',{});
+  return a[k]||{g:[[],[],[]],res:(lg[k]||[null,null,null]).slice(),pts:(h[k]||[0,0,0]).slice()}}
+function enterArch(k){mode='arch';archKey=k;close();day=loadArch(k);
+  lvl=day.res[0]!=='won'?0:day.res[1]!=='won'?1:2;loadDayLevel();fitBoard();
+  if(day.res[2]||day.res.includes('lost'))showStats();else toast('Archiwum: '+shortDate(k),1500)}
+function showArchive(){
+  const a=store.get('sd2_arch',{}),lg=store.get('sd2_log',{}),h=store.get('sd2_hist',{}),today=keyToUTC(todayKey());
+  const fmt=t=>new Date(t).toLocaleDateString('pl-PL',{weekday:'short',day:'numeric',month:'long',timeZone:'UTC'});
+  let rows='';
+  for(let t=today-DAY;t>=START;t-=DAY){const k=utcToKey(t),n=Math.round((t-START)/DAY),e=a[k];
+    const res=(e&&e.res)||lg[k]||[null,null,null],p=((e&&e.pts)||h[k]||[0,0,0]).reduce((x,y)=>x+y,0);
+    const fin=!!(res[2]||res.includes('lost')),started=res.some(Boolean)||!!(e&&e.g&&e.g.some(x=>x&&x.length));
+    const dots=res.map(r=>r==='won'?'🟩':r==='lost'?'🟥':'⬜').join('');
+    const st=fin?'zakończony':started?'do dokończenia':'nierozegrany';
+    rows+=`<button data-ak="${k}"><span>${fmt(t)}<small>#${n+1} · ${st}${e&&e.late?'<span class="tag">nadrobione</span>':''}</small></span><span class="dots">${dots}</span><span class="pt">${p} pkt</span></button>`}
+  open(`<div class="step">Archiwum</div><h2>Poprzednie dni</h2><p class="sub">Zagraj hasła z dni, które Cię ominęły. Punkty liczą się do dnia, którego dotyczą. Dzisiejsze hasła trafią tu jutro.</p><div class="arch">${rows||'<p>Archiwum będzie dostępne od jutra.</p>'}</div><div class="actions"><button id="aClose">Zamknij</button></div>`);
+  document.querySelectorAll('[data-ak]').forEach(b=>b.onclick=()=>enterArch(b.dataset.ak));
 }
 function newFree(){const pool=L[freeLvl];let a;do{a=pool[Math.floor(Math.random()*pool.length)]}while(a===answer);answer=a;guesses=[];cur='';done=false;paint();fitBoard()}
 function setMode(m){mode=m;close();
@@ -387,7 +424,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key.length===1)press(e.key.toLowerCase());
 });
 $('ov').addEventListener('click',e=>{if(e.target.id==='ov')close()});
-$('bHelp').onclick=showHelp;$('bSnd').onclick=()=>{SFX.unlock();SFX.toggle();sndIcon()};sndIcon();$('bStats').onclick=()=>{if(mode!=='day'){setMode('day');toast('Wracasz do haseł dnia')}else showStats()};
+$('bHelp').onclick=showHelp;$('bArch').onclick=showArchive;$('bSnd').onclick=()=>{SFX.unlock();SFX.toggle();sndIcon()};sndIcon();$('bStats').onclick=()=>{if(mode!=='day'){setMode('day');toast('Wracasz do haseł dnia')}else showStats()};
 buildBoard();buildKb();loadDay();loadDayLevel();fitBoard();addEventListener('resize',fitBoard);if(window.visualViewport)visualViewport.addEventListener('resize',fitBoard);setTimeout(fitBoard,300);
 if(!store.get('sd2_seen',false)){store.set('sd2_seen',true);showHelp()}
 else if(day.res[2]||day.res.includes('lost'))showStats();
