@@ -144,6 +144,9 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 .mini .mr{display:flex;gap:3px}
 .mini i{width:24px;height:24px;border-radius:4px;display:grid;place-items:center;font:800 .72rem var(--display);font-style:normal;color:#fff;text-transform:uppercase}
 .daysum div[data-lv]{cursor:pointer}
+.timer{align-self:center;text-align:center;font:600 .85rem var(--body);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-variant-numeric:tabular-nums;max-width:100%}
+.timer.warn{background:#ff8a00;color:#fff;border-color:#ff8a00}
+.timer.out{background:var(--key);color:var(--muted)}
 .tag{font-size:.68rem;background:var(--key);color:var(--ink);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
 </style>
 
@@ -153,6 +156,7 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
     <div class="lvt"><b id="lvName">Poziom 1 z 3</b><small id="lvSub"></small></div>
     <button class="icon" id="bStats" aria-label="Podsumowanie i wyniki">Wyniki</button>
   </div>
+  <div class="timer" id="timer" hidden></div>
   <div class="board-wrap"><div class="board" id="board"></div></div>
   <div class="kb" id="kb"></div>
 </div>
@@ -247,7 +251,8 @@ const SFX=(()=>{let ctx=null,on=store.get('lt_sound',true);
     win(t0){const n=[523.25,659.25,783.99];n.forEach((f,i)=>tone(f,t0+i*0.13,0.16,'triangle',0.25));
       [523.25,659.25,783.99,1046.5].forEach(f=>tone(f,t0+0.42,0.9,'triangle',0.16));
       tone(1046.5,t0+0.42,0.9,'square',0.05);tone(1318.5,t0+0.62,0.6,'sine',0.1)},
-    lose(t0){[392,369.99,349.23].forEach((f,i)=>tone(f,t0+i*0.38,0.34,'sawtooth',0.13,f*0.97));tone(329.63,t0+1.14,0.9,'sawtooth',0.13,290)}
+    lose(t0){[392,369.99,349.23].forEach((f,i)=>tone(f,t0+i*0.38,0.34,'sawtooth',0.13,f*0.97));tone(329.63,t0+1.14,0.9,'sawtooth',0.13,290)},
+    timeup(){[880,660,440].forEach((f,i)=>tone(f,i*0.22,0.2,'square',0.12));tone(330,0.7,0.5,'square',0.12)}
   }})();
 function sndIcon(){$('bSnd').textContent=SFX.on?'🔊':'🔇'}
 function attemptLabel(){const n=guesses.length+1;return n===6?'<span class="last">OSTATNIA PRÓBA</span>':'Próba '+n+' z 6'}
@@ -265,7 +270,9 @@ function press(k){
   if(k!=='ENTER')SFX.key();
   if(k==='ENTER')return submit();
   if(k==='⌫'){cur=cur.slice(0,-1);return paint()}
-  if(cur.length<5&&/^[a-ząćęłńóśźż]$/.test(k)){cur+=k;paint()}
+  if(cur.length<5&&/^[a-ząćęłńóśźż]$/.test(k)){
+    if(mode!=='free'&&!day.t[lvl]){day.t[lvl]=Date.now();saveDay();updTimer()}
+    cur+=k;paint()}
 }
 function submit(){
   if(cur.length<5){shake();return toast('Za mało liter')}
@@ -283,11 +290,13 @@ function finish(won){
   done=true;
   let p=0;
   if(mode!=='free'){
-    p=won?pointsFor(answer,guesses.length):0;
+    const e=day.t[lvl]?Date.now()-day.t[lvl]:null;day.te[lvl]=e;
+    const tb=won&&e!=null?bonusFor(lvl,e):0;day.tb[lvl]=tb;
+    p=won?pointsFor(answer,guesses.length)+tb:0;
     day.res[lvl]=won?'won':'lost';day.pts[lvl]=p;saveDay();
     const h=store.get('sd2_hist',{});h[curKey()]=day.pts.slice();store.set('sd2_hist',h);
   }
-  paint();
+  paint();updTimer();
   if(won)SFX.win(0);else SFX.lose(0);
   toast(won?['Genialnie!','Wspaniale!','Świetnie!','Brawo!','Nieźle!','Uff, udało się!'][guesses.length-1]:'Hasło: '+answer.toUpperCase(),2000);
   setTimeout(()=>showResult(won,p),900);
@@ -296,7 +305,7 @@ function grid(g){return g.map(x=>x.s.map(s=>s==='hit'?'🟩':s==='near'?'🟨':'
 function shareText(){
   if(mode==='free'){const won=(guesses.length&&guesses[guesses.length-1].w===answer);return 'Literalizator (trening, '+LV[freeLvl].n.toLowerCase()+') '+(won?guesses.length:'X')+'/6\n\n'+grid(guesses)}
   let t='Literalizator #'+(curN()+1)+' · '+day.pts.reduce((a,b)=>a+b,0)+' pkt\n';
-  day.res.forEach((r,i)=>{if(!r)return;const g=day.g[i];t+='\nP'+(i+1)+': '+(r==='won'?(g.length||'✓'):'X')+'/6 · '+day.pts[i]+' pkt\n'+grid(g)+'\n'});
+  day.res.forEach((r,i)=>{if(!r)return;const g=day.g[i];t+='\nP'+(i+1)+': '+(r==='won'?(g.length||'✓'):'X')+'/6 · '+day.pts[i]+' pkt'+(day.te&&day.te[i]!=null?' · ⏱'+fmtT(day.te[i]):'')+'\n'+grid(g)+'\n'});
   return t.trim();
 }
 function copy(text){try{navigator.clipboard.writeText(text).then(()=>toast('Skopiowano wynik'),()=>fallback(text))}catch(e){fallback(text)}}
@@ -309,7 +318,10 @@ function showResult(won,p){
   let body,btns='';
   const head=won?'Odgadnięte w '+guesses.length+(guesses.length===1?' próbie':' próbach'):'Tym razem się nie udało';
   if(mode!=='free'){
-    body=won?`<p>${word}</p><p>Wartość słowa ${v} pkt × premia ${7-guesses.length} (za ${guesses.length}. próbę) = <b>${p} pkt</b></p>`
+    const tb=day.tb?day.tb[lvl]:0,te=day.te?day.te[lvl]:null,base=p-tb;
+    body=won?`<p>${word}</p><p>Wartość słowa ${v} pkt × premia ${7-guesses.length} (za ${guesses.length}. próbę) = ${base} pkt</p>`
+      +(tb?`<p>Bonus za czas (${fmtT(te)}): +${tb} pkt</p>`:(te!=null?`<p class="sub">Czas ${fmtT(te)}: bez bonusu za czas.</p>`:''))
+      +`<p>Razem za poziom: <b>${p} pkt</b></p>`
             :`<p>Hasło: ${word} (${v} pkt)</p><p>Tym razem 0 pkt.${lvl<2?(mode==='arch'?' Kolejne poziomy tego dnia zostają zablokowane.':' Kolejny poziom odblokujesz jutro.'):''}</p>`;
     body+=`<p class="sub">${mode==='arch'?'Ten dzień razem':'Dziś razem'}: <b>${day.pts.reduce((a,b)=>a+b,0)} pkt</b></p>`;
     btns=(won&&lvl<2)?`<button class="main" id="aNext">Dalej: Poziom ${lvl+2}</button>`:`<button class="main" id="aSum">Podsumowanie dnia</button>`;
@@ -339,7 +351,7 @@ function showStats(){
   const dayRows=LV.map((l,i)=>{const r=day.res[i],g=day.g[i]||[];const n=curN(),pool=L[i],w=pool[((n%pool.length)+pool.length)%pool.length];
     const word=r?w:(unlocked(i)?'…':'🔒');const note=r==='won'?(g.length?'odgadnięte w '+g.length+'. próbie':'odgadnięte'):r==='lost'?'nie udało się':unlocked(i)?'jeszcze nie rozwiązane':'zablokowane';
     const mini=g.length?`<span class="mini">${g.map(x=>`<span class="mr">${[...x.w].map((ch,j)=>`<i style="background:${COL[x.s[j]]}">${ch}</i>`).join('')}</span>`).join('')}</span>`:'';
-    return `<div${g.length?` data-lv="${i}"`:''}><span>${l.n}</span><span class="w">${word}<small>${note}</small></span><span class="pt">${day.pts[i]} pkt</span>${mini}</div>`}).join('');
+    return `<div${g.length?` data-lv="${i}"`:''}><span>${l.n}</span><span class="w">${word}<small>${note}${day.te&&day.te[i]!=null&&r?' · ⏱ '+fmtT(day.te[i])+(day.tb[i]?' (+'+day.tb[i]+')':''):''}</small></span><span class="pt">${day.pts[i]} pkt</span>${mini}</div>`}).join('');
   const allDone=!!(day.res[2]||day.res.includes('lost'));
   open(`<div class="step">${mode==='arch'?'Archiwum · ':''}Strona 4 z 4 · Podsumowanie</div><h2>${mode==='arch'?'Dzień '+shortDate(archKey):'Podsumowanie dnia'}</h2>
   <p class="sub">Dotknij poziomu, żeby zobaczyć jego pełną planszę.</p><div class="daysum">${dayRows}</div>
@@ -378,6 +390,7 @@ function showHelp(){
   <p>Codziennie są trzy hasła. Każde jest warte więcej punktów, liczonych jak w Scrabble: <b>Poziom 1</b> to słowa za 5–8 pkt, <b>Poziom 2</b> za 9–11 pkt, <b>Poziom 3</b> za 12 pkt i więcej.</p>
   <p>Poziomy idą po kolei: poziom 2 odblokowuje się po odgadnięciu hasła z poziomu 1, a poziom 3 po odgadnięciu hasła z poziomu 2. Na końcu czeka podsumowanie dnia ze statystykami.</p>
   <p>Wynik = wartość słowa × premia za szybkość: 6 za odgadnięcie w 1. próbie, 5 w 2., i tak dalej do 1 w 6. próbie. Przykład: ŻÓŁTY (17 pkt) odgadnięty w 3. próbie daje 17 × 4 = 68 pkt.</p>
+  <p><b>Bonus za czas.</b> Zegar 3:00 rusza po wpisaniu pierwszej litery danego poziomu i nie zatrzymuje się po wyjściu z gry. Za hasło odgadnięte w 1. minucie, w 2. minucie lub przed końcem 3. minuty dostajesz dodatkowo: poziom 1 – 20 / 15 / 10 pkt, poziom 2 – 40 / 30 / 20 pkt, poziom 3 – 60 / 45 / 30 pkt. Po 3 minutach usłyszysz sygnał i grasz dalej, już bez bonusu za czas.</p>
   <table class="vals">${Object.keys(groups).sort((a,b)=>a-b).map(v=>`<tr><td>${v} pkt</td><td>${groups[v].join(' ')}</td></tr>`).join('')}</table>
   <p class="sub">Trening (na stronie podsumowania) losuje słowa z wybranego poziomu bez limitu; punkty w treningu się nie liczą.</p>
   <p class="sub">Archiwum (przycisk 📅 u góry) pozwala zagrać hasła z poprzednich dni. Punkty liczą się do dnia, którego dotyczą.</p>
@@ -389,16 +402,39 @@ function saveDay(){const k=curKey();
 function loadDay(){
   const s=store.get('sd2_day',null);
   // poprzedni dzień (np. niedokończony) przenosimy do archiwum, żeby dało się go dograć
-  if(s&&typeof s.d==='number'&&s.d>=0&&s.d<dayNo()){const k=utcToKey(START+s.d*DAY),a=store.get('sd2_arch',{});if(!a[k]){a[k]={g:s.g,res:s.res,pts:s.pts};store.set('sd2_arch',a)}}
+  if(s&&typeof s.d==='number'&&s.d>=0&&s.d<dayNo()){const k=utcToKey(START+s.d*DAY),a=store.get('sd2_arch',{});if(!a[k]){a[k]={g:s.g,res:s.res,pts:s.pts,t:s.t,te:s.te,tb:s.tb};store.set('sd2_arch',a)}}
   day=(s&&s.d===dayNo())?s:{d:dayNo(),g:[[],[],[]],res:[null,null,null],pts:[0,0,0]};
   lvl=day.res[0]!=='won'?0:day.res[1]!=='won'?1:2;
   if(day.res[lvl]==='lost'&&lvl>0)lvl=lvl;
 }
 function loadDayLevel(){
   const n=curN(),pool=L[lvl];answer=pool[((n%pool.length)+pool.length)%pool.length];
-  guesses=day.g[lvl]||[];done=!!day.res[lvl];cur='';paint();
-  
+  day.t=day.t||[0,0,0];day.te=day.te||[null,null,null];day.tb=day.tb||[0,0,0];
+  guesses=day.g[lvl]||[];done=!!day.res[lvl];cur='';
+  if(day.t[lvl]&&Date.now()-day.t[lvl]>TLIM*1000)timeupFired=curKey()+':'+lvl;
+  paint();updTimer();
 }
+// ---- Zegar: 3 minuty od pierwszej litery, bonus zależny od poziomu
+const TB=[[20,15,10],[40,30,20],[60,45,30]], TLIM=180;
+const fmtT=ms=>{const x=Math.max(0,Math.floor(ms/1000));return Math.floor(x/60)+':'+String(x%60).padStart(2,'0')};
+const bonusFor=(L0,ms)=>ms<=60000?TB[L0][0]:ms<=120000?TB[L0][1]:ms<=TLIM*1000?TB[L0][2]:0;
+let timeupFired=null;
+function updTimer(){const el=$('timer');if(!el)return;
+  if(mode==='free'||!day||!day.t){el.hidden=true;return}
+  el.hidden=false;el.className='timer';
+  const st=day.t[lvl],te=day.te[lvl];
+  if(done){if(te==null){el.hidden=true;return}
+    const b=day.tb[lvl];el.innerHTML='⏱ Czas '+fmtT(te)+' · '+(b?'bonus <b>+'+b+' pkt</b>':'bez bonusu za czas');return}
+  if(!st){el.innerHTML='⏱ 3:00 · start po pierwszej literze · bonus do <b>+'+TB[lvl][0]+'</b>';return}
+  const e=Date.now()-st;
+  if(e>TLIM*1000){el.className='timer out';el.textContent='⏱ Czas minął · bez bonusu za czas';
+    const key=curKey()+':'+lvl;
+    if(timeupFired!==key){timeupFired=key;SFX.timeup();const t=$('toast');t.classList.add('big');toast('Minęły 3 minuty, bez bonusu',2400);setTimeout(()=>t.classList.remove('big'),2400)}
+    return}
+  if((e%60000)>=30000)el.className='timer warn';
+  el.innerHTML='⏱ '+fmtT(TLIM*1000-e)+' · bonus <b>+'+bonusFor(lvl,e)+' pkt</b>';
+}
+setInterval(updTimer,250);
 // ---- Archiwum poprzednich dni
 function loadArch(k){const a=store.get('sd2_arch',{}),lg=store.get('sd2_log',{}),h=store.get('sd2_hist',{});
   return a[k]||{g:[[],[],[]],res:(lg[k]||[null,null,null]).slice(),pts:(h[k]||[0,0,0]).slice()}}
