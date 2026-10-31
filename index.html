@@ -140,6 +140,10 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 .arch .pt{font-variant-numeric:tabular-nums;font-weight:800;white-space:nowrap}
 .top{gap:6px}.top .icon{min-width:36px;padding:0 6px}
 .k.go{font-size:.74rem;letter-spacing:0}
+.mini{grid-column:1/-1;display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.mini .mr{display:flex;gap:3px}
+.mini i{width:24px;height:24px;border-radius:4px;display:grid;place-items:center;font:800 .72rem var(--display);font-style:normal;color:#fff;text-transform:uppercase}
+.daysum div[data-lv]{cursor:pointer}
 .tag{font-size:.68rem;background:var(--key);color:var(--ink);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
 </style>
 
@@ -199,7 +203,7 @@ function paint(){
   const rows=$('board').children;
   for(let r=0;r<6;r++){const g=guesses[r],tiles=rows[r].children;
     for(let c=0;c<5;c++){const t=tiles[c];
-      if(g){t.innerHTML=tileHTML(g.w[c]);t.className='t '+g.s[c];paintTile(t,g.s[c])}
+      if(g){t.innerHTML=tileHTML(g.w[c]);t.className='t '+g.s[c];clearStyle(t);paintTile(t,g.s[c])}
       else if(r===guesses.length&&!done){t.innerHTML=tileHTML(cur[c]);t.className='t'+(cur[c]?' f':'');clearStyle(t)}
       else{t.innerHTML='';t.className='t';clearStyle(t)}}}
   const go=document.querySelector('.k.go');if(go)go.classList.toggle('ready',cur.length===5&&!done);
@@ -334,10 +338,11 @@ function showStats(){
   const month=new Date(t).toLocaleDateString('pl-PL',{month:'long',timeZone:'UTC'});
   const dayRows=LV.map((l,i)=>{const r=day.res[i],g=day.g[i]||[];const n=curN(),pool=L[i],w=pool[((n%pool.length)+pool.length)%pool.length];
     const word=r?w:(unlocked(i)?'…':'🔒');const note=r==='won'?(g.length?'odgadnięte w '+g.length+'. próbie':'odgadnięte'):r==='lost'?'nie udało się':unlocked(i)?'jeszcze nie rozwiązane':'zablokowane';
-    return `<div><span>${l.n}</span><span class="w">${word}<small>${note}</small></span><span class="pt">${day.pts[i]} pkt</span></div>`}).join('');
+    const mini=g.length?`<span class="mini">${g.map(x=>`<span class="mr">${[...x.w].map((ch,j)=>`<i style="background:${COL[x.s[j]]}">${ch}</i>`).join('')}</span>`).join('')}</span>`:'';
+    return `<div${g.length?` data-lv="${i}"`:''}><span>${l.n}</span><span class="w">${word}<small>${note}</small></span><span class="pt">${day.pts[i]} pkt</span>${mini}</div>`}).join('');
   const allDone=!!(day.res[2]||day.res.includes('lost'));
   open(`<div class="step">${mode==='arch'?'Archiwum · ':''}Strona 4 z 4 · Podsumowanie</div><h2>${mode==='arch'?'Dzień '+shortDate(archKey):'Podsumowanie dnia'}</h2>
-  <div class="daysum">${dayRows}</div>
+  <p class="sub">Dotknij poziomu, żeby zobaczyć jego pełną planszę.</p><div class="daysum">${dayRows}</div>
   <div class="total"><span>${mode==='arch'?'Ten dzień razem':'Dziś razem'}</span><span>${day.pts.reduce((a,b)=>a+b,0)} pkt</span></div>
   <div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${mode==='arch'||allDone?'Pokaż planszę':'Wróć do haseł dnia'}</button><button id="aArch">📅 Archiwum</button></div>
   <h2>Twoje punkty</h2>
@@ -352,6 +357,7 @@ function showStats(){
   $('aShare').onclick=()=>{const m=mode;if(m==='free')mode='day';const t=shareText();mode=m;copy(t)};
   $('aBack').onclick=()=>{close();if(mode==='free')setMode('day')};
   $('aArch').onclick=showArchive;
+  document.querySelectorAll('[data-lv]').forEach(d=>d.onclick=()=>{lvl=+d.dataset.lv;close();loadDayLevel();fitBoard()});
 }
 function askReset(){
   open(`<h2>Zacząć od nowa?</h2><p>Usunę wszystkie punkty, statystyki i dzisiejsze postępy na wszystkich poziomach. Tego nie da się cofnąć.</p>
