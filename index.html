@@ -147,12 +147,40 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 .timer{align-self:center;text-align:center;font:600 .85rem var(--body);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-variant-numeric:tabular-nums;max-width:100%}
 .timer.warn{background:#ff8a00;color:#fff;border-color:#ff8a00}
 .timer.out{background:var(--key);color:var(--muted)}
+.ico{display:inline-block;vertical-align:-3px;flex:none}
+.icon{display:inline-flex;align-items:center;justify-content:center;gap:5px;position:relative}
+.icon .lbl{display:none}
+@media (min-width:430px){#bArch .lbl{display:inline}}
+.badge{position:absolute;top:-7px;right:-7px;background:#e5484d;color:#fff;border-radius:999px;font:800 .66rem var(--body);min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;display:grid;place-items:center;line-height:1}
+.k.del{background:var(--panel);border:1.5px solid var(--muted);color:var(--ink)}
+.k.del .ico{vertical-align:middle}
+.timer .tbar{display:block;height:5px;background:var(--key);border-radius:3px;margin:4px 0 1px;overflow:hidden}
+.timer .tbar i{display:block;height:100%;background:#12a150;transition:width .25s linear}
+.timer.warn .tbar{background:rgba(255,255,255,.35)} .timer.warn .tbar i{background:#fff}
+.sq{display:inline-block;width:12px;height:12px;border-radius:3px;margin-left:2px;vertical-align:-1px}
+.boards{display:flex;flex-direction:column;gap:10px}
+.boards .bl{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.boards .bh{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.boards .bh .w{font-family:var(--display);font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.boards .mini{margin-top:0}
+.boards .mini i{width:34px;height:34px;font-size:1rem;border-radius:5px}
+.cel{display:flex;align-items:center;gap:14px}
+.medal{flex:none;animation:drop .8s cubic-bezier(.2,1.5,.4,1) both}
+.cel .msg{font-family:var(--display);font-weight:800;font-size:1.15rem;line-height:1.25}
+.cel .msg small{display:block;font:400 .82rem var(--body);color:var(--muted);margin-top:3px}
+.bolt{display:inline-flex;align-items:center;gap:4px;background:#ff8a00;color:#fff;border-radius:999px;padding:2px 10px 2px 6px;font:800 .78rem var(--body);margin-top:6px;animation:pulse 1.2s ease 2}
+.full{background:var(--lvwon);border-radius:8px;padding:8px 12px;font-weight:600;text-align:center}
+@keyframes drop{0%{transform:translateY(-70px) rotate(-25deg) scale(.6);opacity:0}100%{transform:none;opacity:1}}
+@keyframes pulse{50%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.medal,.bolt{animation:none}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
+.pt .ico{margin-right:3px}
 .tag{font-size:.68rem;background:var(--key);color:var(--ink);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
 </style>
 
 <div class="app">
   <div class="top">
-    <button class="icon" id="bHelp" aria-label="Zasady">?</button><button class="icon" id="bSnd" aria-label="Dźwięk">🔊</button><button class="icon" id="bArch" aria-label="Archiwum poprzednich dni">📅</button>
+    <button class="icon" id="bHelp" aria-label="Zasady">?</button><button class="icon" id="bSnd" aria-label="Dźwięk"></button><button class="icon" id="bArch" aria-label="Archiwum poprzednich dni"></button>
     <div class="lvt"><b id="lvName">Poziom 1 z 3</b><small id="lvSub"></small></div>
     <button class="icon" id="bStats" aria-label="Podsumowanie i wyniki">Wyniki</button>
   </div>
@@ -169,6 +197,40 @@ const L=D.L, VALID=new Set(D.v), PV=D.P;
 const LV=[{n:'Poziom 1',r:'5–8 pkt'},{n:'Poziom 2',r:'9–11 pkt'},{n:'Poziom 3',r:'12+ pkt'}];
 const START=Date.UTC(2026,9,25), DAY=864e5;
 const $=id=>document.getElementById(id);
+// ---- Ikony SVG (zamiast emoji, które na starszych Windowsach pokazują się jako puste prostokąty)
+const SVG={
+  cal:'<path d="M4 6h16v14H4z"/><path d="M4 10.5h16M8.5 3.5v5M15.5 3.5v5"/><path d="M8 14h2M14 14h2M8 17h2"/>',
+  sndOn:'<path d="M4 9.5h4l5-4v13l-5-4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
+  sndOff:'<path d="M4 9.5h4l5-4v13l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/>',
+  clock:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4.2l2.8 1.8M9.5 3h5"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  del:'<path d="M9 5.5h11v13H9l-6-6.5z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>',
+  bolt:'<path d="M13.5 2.5L5 13.5h6l-1.5 8 8.5-11h-6z" fill="currentColor"/>',
+  sun:'<path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M12 6.5v2.5M5.2 9.7l1.8 1.8M18.8 9.7L17 11.5M3 14h1.5M19.5 14H21"/>'};
+const ic=(n,s=18)=>`<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SVG[n]}</svg>`;
+const MED={gold:['#f6cf45','#c99a06','#fff3b8'],silver:['#dfe3e8','#98a2ad','#ffffff'],bronze:['#e4a46a','#a5652e','#ffd9b5']};
+const medalKind=t=>t<=2?'gold':t<=4?'silver':'bronze';
+const medalName={gold:'złoty medal',silver:'srebrny medal',bronze:'brązowy medal'};
+function medal(kind,s=72){const [f,d,h]=MED[kind];
+  return `<svg class="${s>30?'medal':'ico'}" width="${s}" height="${s}" viewBox="0 0 64 64" aria-label="${medalName[kind]}"><path d="M20 2h10l6 20h-10z" fill="#e5484d"/><path d="M44 2H34l-6 20h10z" fill="#3b82f6"/><circle cx="32" cy="40" r="20" fill="${d}"/><circle cx="32" cy="40" r="16" fill="${f}"/><path d="M32 29.5l3.2 6.6 7.2 1-5.2 5 1.3 7.2-6.5-3.4-6.5 3.4 1.3-7.2-5.2-5 7.2-1z" fill="${h}" stroke="${d}" stroke-width="1.2" stroke-linejoin="round"/></svg>`}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const CHEER={gold:['Mistrzostwo!','Słownik drży przed Tobą.','Czytasz w myślach?','Jak z nut!'],
+  silver:['Pewna ręka!','Solidna robota.','Tak się to robi!','Klasa!'],
+  bronze:['Uff, ale się udało!','Liczy się wynik!','Wytrwałość popłaca.','Na styk, ale w punkt!'],
+  lost:['Jutro nowe słowo, nowa szansa.','Nawet mistrzowie czasem pudłują.','To słowo było wyjątkowo podchwytliwe.']};
+// ---- Konfetti (rysowane w przeglądarce, bez plików)
+function confetti(n){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const old=$('fx');if(old)old.remove();
+  const c=document.createElement('canvas');c.id='fx';document.body.appendChild(c);
+  const W=c.width=innerWidth,H=c.height=innerHeight,x=c.getContext('2d');if(!x)return;
+  const cols=['#12a150','#ff8a00','#3b82f6','#e5484d','#f6cf45','#a855f7'];
+  const P=[];for(let i=0;i<n;i++)P.push({x:W*(.2+Math.random()*.6),y:H*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*15-5,w:6+Math.random()*6,h:4+Math.random()*4,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:pick(cols)});
+  const t0=performance.now();
+  (function step(t){const k=(t-t0)/2800;x.clearRect(0,0,W,H);
+    P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.globalAlpha=Math.max(0,1-k*k);x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()});
+    if(k<1)requestAnimationFrame(step);else c.remove()})(t0);
+}
 const val=w=>[...w].reduce((s,c)=>s+(PV[c]||0),0);
 const pointsFor=(w,tries)=>val(w)*(7-tries);
 function todayKey(){return new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Warsaw'})}
@@ -189,17 +251,17 @@ function score(g,a){
   for(let i=0;i<5;i++){ if(r[i]!=='hit' && left[g[i]]>0){ r[i]='near'; left[g[i]]--; } }
   return r;
 }
-const tileHTML=ch=>ch?`${ch}<span class="v">${PV[ch]||0}</span>`:'';
+const tileHTML=ch=>ch||'';
 
 function buildBoard(){const b=$('board');b.innerHTML='';
   for(let r=0;r<6;r++){const row=document.createElement('div');row.className='row';
     for(let c=0;c<5;c++){const t=document.createElement('div');t.className='t';row.appendChild(t)}b.appendChild(row)}}
-const ROWS=[['ą','ć','ę','ł','ń','ó','ś','ź','ż'],['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['⌫','z','x','c','v','b','n','m','ENTER']];
+const ROWS=[['ą','ć','ę','ł','ń','ó','ś','ź','ż'],['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['ENTER','z','x','c','v','b','n','m','⌫']];
 const PL='ąćęłńóśźż';
 function buildKb(){const kb=$('kb');kb.innerHTML='';
   ROWS.forEach(r=>{const row=document.createElement('div');row.className='kr';
     r.forEach(k=>{const b=document.createElement('button');b.className='k'+(k==='ENTER'?' go':k==='⌫'?' del':'')+(PL.includes(k)?' pl':'');
-      b.innerHTML=k==='ENTER'?'SPRAWDŹ':k==='⌫'?'⌫':`${k}<span class="v">${PV[k]||''}</span>`;
+      b.innerHTML=k==='ENTER'?'SPRAWDŹ':k==='⌫'?ic('del',24):k;
       b.dataset.k=k;b.setAttribute('aria-label',k==='⌫'?'Usuń':k==='ENTER'?'Sprawdź':k);
       b.addEventListener('click',()=>{press(k);b.blur()});row.appendChild(b)});
     kb.appendChild(row)});}
@@ -254,7 +316,7 @@ const SFX=(()=>{let ctx=null,on=store.get('lt_sound',true);
     lose(t0){[392,369.99,349.23].forEach((f,i)=>tone(f,t0+i*0.38,0.34,'sawtooth',0.13,f*0.97));tone(329.63,t0+1.14,0.9,'sawtooth',0.13,290)},
     timeup(){[880,660,440].forEach((f,i)=>tone(f,i*0.22,0.2,'square',0.12));tone(330,0.7,0.5,'square',0.12)}
   }})();
-function sndIcon(){$('bSnd').textContent=SFX.on?'🔊':'🔇'}
+function sndIcon(){$('bSnd').innerHTML=ic(SFX.on?'sndOn':'sndOff',20)}
 function attemptLabel(){const n=guesses.length+1;return n===6?'<span class="last">OSTATNIA PRÓBA</span>':'Próba '+n+' z 6'}
 function attemptToast(){const n=guesses.length+1;const t=$('toast');t.classList.add('big');toast(n===6?'OSTATNIA PRÓBA':'Próba '+n,1500);setTimeout(()=>t.classList.remove('big'),1500)}
 function fitBoard(){const w=document.querySelector('.board-wrap'),b=$('board');if(!w)return;
@@ -299,7 +361,7 @@ function finish(won){
   paint();updTimer();
   if(won)SFX.win(0);else SFX.lose(0);
   toast(won?['Genialnie!','Wspaniale!','Świetnie!','Brawo!','Nieźle!','Uff, udało się!'][guesses.length-1]:'Hasło: '+answer.toUpperCase(),2000);
-  setTimeout(()=>showResult(won,p),900);
+  setTimeout(()=>{showResult(won,p);if(won)confetti(mode==='free'?70:(lvl===2?240:120))},900);
 }
 function grid(g){return g.map(x=>x.s.map(s=>s==='hit'?'🟩':s==='near'?'🟨':'⬜').join('')).join('\n')}
 function shareText(){
@@ -310,13 +372,23 @@ function shareText(){
 }
 function copy(text){try{navigator.clipboard.writeText(text).then(()=>toast('Skopiowano wynik'),()=>fallback(text))}catch(e){fallback(text)}}
 function fallback(text){const a=document.createElement('textarea');a.value=text;a.rows=8;a.readOnly=true;a.style.width='100%';$('card').appendChild(a);a.select();toast('Zaznacz i skopiuj tekst')}
-function close(){$('ov').hidden=true}
+function archPending(){const a=store.get('sd2_arch',{}),lg=store.get('sd2_log',{}),today=keyToUTC(todayKey());let n=0;
+  for(let t=today-DAY;t>=START;t-=DAY){const k=utcToKey(t),e=a[k],res=(e&&e.res)||lg[k]||[null,null,null];if(!(res[2]||res.includes('lost')))n++}return n}
+function updBadge(){const n=archPending(),b=$('arBadge');if(!b)return;b.hidden=!n;b.textContent=n;
+  $('bArch').title=n?'Archiwum · zaległe dni: '+n:'Archiwum poprzednich dni'}
+function close(){$('ov').hidden=true;updBadge()}
 function open(html){$('card').innerHTML=html;$('ov').hidden=false;const c=$('aClose');if(c)c.onclick=close}
 
 function showResult(won,p){
   const v=val(answer), word=`<span class="answer">${answer}</span>`;
   let body,btns='';
   const head=won?'Odgadnięte w '+guesses.length+(guesses.length===1?' próbie':' próbach'):'Tym razem się nie udało';
+  const mk=won?medalKind(guesses.length):null;
+  const tbNow=(mode!=='free'&&day.tb)?day.tb[lvl]:0;
+  const bolt=won&&mode!=='free'&&tbNow>=TMAX[lvl]/2?`<span class="bolt">${ic('bolt',14)} Błyskawica! Ponad połowa bonusu za czas</span>`:'';
+  const cel=won?`<div class="cel">${medal(mk)}<div class="msg">${pick(CHEER[mk])}<small>${medalName[mk][0].toUpperCase()+medalName[mk].slice(1)} za ${guesses.length}. próbę</small>${bolt}</div></div>`
+    :`<div class="cel"><span style="color:var(--near)">${ic('sun',64)}</span><div class="msg">${pick(CHEER.lost)}<small>${mode==='arch'?'W archiwum czekają kolejne dni.':'Każdy dzień to nowe hasła.'}</small></div></div>`;
+  const full=won&&mode!=='free'&&lvl===2?`<div class="full">Komplet! Wszystkie 3 hasła ${mode==='arch'?'tego dnia':'dnia'} odgadnięte.</div>`:'';
   if(mode!=='free'){
     const tb=day.tb?day.tb[lvl]:0,te=day.te?day.te[lvl]:null,base=p-tb;
     body=won?`<p>${word}</p><p>Wartość słowa ${v} pkt × premia ${7-guesses.length} (za ${guesses.length}. próbę) = ${base} pkt</p>`
@@ -325,12 +397,12 @@ function showResult(won,p){
             :`<p>Hasło: ${word} (${v} pkt)</p><p>Tym razem 0 pkt.${lvl<2?(mode==='arch'?' Kolejne poziomy tego dnia zostają zablokowane.':' Kolejny poziom odblokujesz jutro.'):''}</p>`;
     body+=`<p class="sub">${mode==='arch'?'Ten dzień razem':'Dziś razem'}: <b>${day.pts.reduce((a,b)=>a+b,0)} pkt</b></p>`;
     btns=(won&&lvl<2)?`<button class="main" id="aNext">Dalej: Poziom ${lvl+2}</button>`:`<button class="main" id="aSum">Podsumowanie dnia</button>`;
-    open(`<div class="step">${mode==='arch'?'Archiwum '+shortDate(archKey)+' · ':''}Strona ${lvl+1} z 4 · ${LV[lvl].n}</div><h2>${head}</h2>${body}<div class="actions">${btns}</div><button class="linkbtn" id="aClose">Pokaż planszę</button>`);
+    open(`<div class="step">${mode==='arch'?'Archiwum '+shortDate(archKey)+' · ':''}Strona ${lvl+1} z 4 · ${LV[lvl].n}</div><h2>${head}</h2>${cel}${full}${body}<div class="actions">${btns}</div><button class="linkbtn" id="aClose">Pokaż planszę</button>`);
     if($('aNext'))$('aNext').onclick=()=>{close();lvl++;loadDayLevel()};
     if($('aSum'))$('aSum').onclick=showStats;
   } else {
     body=`<p>Hasło: ${word} · ${v} pkt</p><p class="sub">W treningu punkty się nie liczą.</p>`;
-    open(`<div class="step">Trening · ${LV[freeLvl].n}</div><h2>${head}</h2>${body}<div class="actions"><button class="main" id="aAgain">Nowe słowo</button></div>${trainPicker()}<button class="linkbtn" id="aDay">Wróć do haseł dnia</button>`);
+    open(`<div class="step">Trening · ${LV[freeLvl].n}</div><h2>${head}</h2>${cel}${body}<div class="actions"><button class="main" id="aAgain">Nowe słowo</button></div>${trainPicker()}<button class="linkbtn" id="aDay">Wróć do haseł dnia</button>`);
     $('aAgain').onclick=()=>{close();newFree()};bindTrain();$('aDay').onclick=()=>setMode('day');
   }
 }
@@ -349,14 +421,20 @@ function showStats(){
   const lg=store.get('sd2_log',{});for(const k in lg)lg[k].forEach((r,i)=>{if(r){played[i]++;if(r==='won')won[i]++}});
   const month=new Date(t).toLocaleDateString('pl-PL',{month:'long',timeZone:'UTC'});
   const dayRows=LV.map((l,i)=>{const r=day.res[i],g=day.g[i]||[];const n=curN(),pool=L[i],w=pool[((n%pool.length)+pool.length)%pool.length];
-    const word=r?w:(unlocked(i)?'…':'🔒');const note=r==='won'?(g.length?'odgadnięte w '+g.length+'. próbie':'odgadnięte'):r==='lost'?'nie udało się':unlocked(i)?'jeszcze nie rozwiązane':'zablokowane';
+    const word=r?w:(unlocked(i)?'…':ic('lock',15));const note=r==='won'?(g.length?'odgadnięte w '+g.length+'. próbie':'odgadnięte'):r==='lost'?'nie udało się':unlocked(i)?'jeszcze nie rozwiązane':'zablokowane';
     const mini=g.length?`<span class="mini">${g.map(x=>`<span class="mr">${[...x.w].map((ch,j)=>`<i style="background:${COL[x.s[j]]}">${ch}</i>`).join('')}</span>`).join('')}</span>`:'';
-    return `<div${g.length?` data-lv="${i}"`:''}><span>${l.n}</span><span class="w">${word}<small>${note}${day.te&&day.te[i]!=null&&r?' · ⏱ '+fmtT(day.te[i])+(day.tb[i]?' (+'+day.tb[i]+')':''):''}</small></span><span class="pt">${day.pts[i]} pkt</span>${mini}</div>`}).join('');
+    return `<div${g.length?` data-lv="${i}"`:''}><span>${l.n}</span><span class="w">${word}<small>${note}${day.te&&day.te[i]!=null&&r?' · '+ic('clock',12)+' '+fmtT(day.te[i])+(day.tb[i]?' (+'+day.tb[i]+')':''):''}</small></span><span class="pt">${r==='won'&&g.length?medal(medalKind(g.length),18):''}${day.pts[i]} pkt</span>${mini}</div>`}).join('');
+  const boards=day.g.some(x=>x&&x.length)?LV.map((l,i)=>{const g=day.g[i]||[],r=day.res[i];if(!g.length)return '';const n=curN(),pool=L[i],w=pool[((n%pool.length)+pool.length)%pool.length];
+    return `<div class="bl"><div class="bh"><span>${l.n} · <span class="w">${r?w:'w trakcie'}</span></span><span>${r==='won'?medal(medalKind(g.length),18):''}${day.pts[i]} pkt</span></div><span class="mini">${g.map(x=>`<span class="mr">${[...x.w].map((ch,j)=>`<i style="background:${COL[x.s[j]]}">${ch}</i>`).join('')}</span>`).join('')}</span></div>`}).join('')
+    :'<p class="sub">Plansze z tego dnia nie zostały zapisane: ten dzień rozegrano w starszej wersji gry, która zapamiętywała tylko wynik. Punkty są policzone.</p>';
+  const pend=archPending();
   const allDone=!!(day.res[2]||day.res.includes('lost'));
   open(`<div class="step">${mode==='arch'?'Archiwum · ':''}Strona 4 z 4 · Podsumowanie</div><h2>${mode==='arch'?'Dzień '+shortDate(archKey):'Podsumowanie dnia'}</h2>
-  <p class="sub">Dotknij poziomu, żeby zobaczyć jego pełną planszę.</p><div class="daysum">${dayRows}</div>
+  ${day.g.some(x=>x&&x.length)?'<p class="sub">Dotknij poziomu, żeby zobaczyć jego pełną planszę.</p>':''}<div class="daysum">${dayRows}</div>
   <div class="total"><span>${mode==='arch'?'Ten dzień razem':'Dziś razem'}</span><span>${day.pts.reduce((a,b)=>a+b,0)} pkt</span></div>
-  <div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${mode==='arch'||allDone?'Pokaż planszę':'Wróć do haseł dnia'}</button><button id="aArch">📅 Archiwum</button></div>
+  <div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${mode==='arch'||allDone?'Pokaż plansze':'Wróć do haseł dnia'}</button><button id="aArch">${ic('cal',16)} Archiwum${pend?' ('+pend+')':''}</button></div>
+  <div class="boards" id="boards" hidden>${boards}</div>
+  ${pend?`<p class="sub">Zaległe dni w archiwum: <b>${pend}</b>. Możesz je nadrobić, punkty liczą się do dnia, którego dotyczą.</p>`:''}
   <h2>Twoje punkty</h2>
   <div class="stats"><div><b>${sumRange(h,t,t)}</b><span>dziś</span></div><div><b>${sumRange(h,wFrom,wFrom+6*DAY)}</b><span>ten tydzień</span></div><div><b>${sumRange(h,mFrom,t)}</b><span>${month}</span></div><div><b>${all}</b><span>łącznie</span></div></div>
   <div class="week">${days.map((d,i)=>{const s=d.p[0]+d.p[1]+d.p[2];return `<div>${s||''}<i style="height:${s/mx*80}%">${d.p.map((p,j)=>p?`<s class="c${j+1}" style="height:${p/s*100}%"></s>`:'').join('')}</i>${names[i]}</div>`}).join('')}</div>
@@ -367,7 +445,7 @@ function showStats(){
   <button class="linkbtn" id="aReset">Zacznij od nowa (wyzeruj wyniki)</button>`);
   $('aReset').onclick=askReset;bindTrain();
   $('aShare').onclick=()=>{const m=mode;if(m==='free')mode='day';const t=shareText();mode=m;copy(t)};
-  $('aBack').onclick=()=>{close();if(mode==='free')setMode('day')};
+  $('aBack').onclick=(mode==='arch'||allDone)?()=>{const b=$('boards');b.hidden=!b.hidden;$('aBack').textContent=b.hidden?'Pokaż plansze':'Ukryj plansze';if(!b.hidden)b.scrollIntoView({behavior:'smooth',block:'nearest'})}:()=>{close();if(mode==='free')setMode('day')};
   $('aArch').onclick=showArchive;
   document.querySelectorAll('[data-lv]').forEach(d=>d.onclick=()=>{lvl=+d.dataset.lv;close();loadDayLevel();fitBoard()});
 }
@@ -385,16 +463,18 @@ function showHelp(){
   ${ex('kubek',['hit'])}<p><b>K</b> jest w słowie i stoi na dobrym miejscu (zielony).</p>
   ${ex('rondo',['','near'])}<p><b>O</b> jest w słowie, ale w innym miejscu (pomarańczowy).</p>
   ${ex('zegar',['','','miss'])}<p><b>G</b> nie występuje w słowie. Na klawiaturze taka litera staje się blada, przekreślona i w przerywanej ramce.</p>
-  <p class="sub">Dźwięki: wysoki dzwonek za zieloną literę, niższy za pomarańczową, głuche puknięcie za pudło, „bzyczenie” gdy w próbie nic nie trafiłeś, fanfary za odgadnięte hasło i smutna trąbka za przegrany poziom. Wyciszysz je przyciskiem 🔊 u góry.</p>
+  <p class="sub">Dźwięki: wysoki dzwonek za zieloną literę, niższy za pomarańczową, głuche puknięcie za pudło, „bzyczenie” gdy w próbie nic nie trafiłeś, fanfary za odgadnięte hasło i smutna trąbka za przegrany poziom. Wyciszysz je przyciskiem z głośnikiem u góry.</p>
   <h2>Poziomy i punkty</h2>
   <p>Codziennie są trzy hasła. Każde jest warte więcej punktów, liczonych jak w Scrabble: <b>Poziom 1</b> to słowa za 5–8 pkt, <b>Poziom 2</b> za 9–11 pkt, <b>Poziom 3</b> za 12 pkt i więcej.</p>
   <p>Poziomy idą po kolei: poziom 2 odblokowuje się po odgadnięciu hasła z poziomu 1, a poziom 3 po odgadnięciu hasła z poziomu 2. Na końcu czeka podsumowanie dnia ze statystykami.</p>
   <p>Wynik = wartość słowa × premia za szybkość: 6 za odgadnięcie w 1. próbie, 5 w 2., i tak dalej do 1 w 6. próbie. Przykład: ŻÓŁTY (17 pkt) odgadnięty w 3. próbie daje 17 × 4 = 68 pkt.</p>
-  <p><b>Bonus za czas.</b> Zegar 3:00 rusza po wpisaniu pierwszej litery danego poziomu i nie zatrzymuje się po wyjściu z gry. Za hasło odgadnięte w 1. minucie, w 2. minucie lub przed końcem 3. minuty dostajesz dodatkowo: poziom 1 – 20 / 15 / 10 pkt, poziom 2 – 40 / 30 / 20 pkt, poziom 3 – 60 / 45 / 30 pkt. Po 3 minutach usłyszysz sygnał i grasz dalej, już bez bonusu za czas.</p>
+  <p><b>Bonus za czas.</b> Zegar 5:00 rusza po wpisaniu pierwszej litery danego poziomu i nie zatrzymuje się po wyjściu z gry. Bonus maleje płynnie z każdą sekundą: na starcie wynosi 20 pkt na poziomie 1, 40 pkt na poziomie 2 i 60 pkt na poziomie 3, a po 5 minutach spada do zera. Pasek pod zegarem pokazuje, ile jeszcze zostało. Po 5 minutach usłyszysz sygnał i grasz dalej, już bez bonusu za czas.</p>
+  <p><b>Medale.</b> Za odgadnięte hasło dostajesz medal: złoty za 1–2 próby, srebrny za 3–4, brązowy za 5–6. Jeśli zgarniesz co najmniej połowę bonusu za czas, dochodzi Błyskawica.</p>
+  <p class="sub">Wartości liter (do liczenia punktów):</p>
   <table class="vals">${Object.keys(groups).sort((a,b)=>a-b).map(v=>`<tr><td>${v} pkt</td><td>${groups[v].join(' ')}</td></tr>`).join('')}</table>
   <p class="sub">Trening (na stronie podsumowania) losuje słowa z wybranego poziomu bez limitu; punkty w treningu się nie liczą.</p>
-  <p class="sub">Archiwum (przycisk 📅 u góry) pozwala zagrać hasła z poprzednich dni. Punkty liczą się do dnia, którego dotyczą.</p>
-  <div class="actions"><button class="main" id="aClose">Gramy</button></div>`);
+  <p class="sub">Archiwum (przycisk z kalendarzem u góry, czerwona liczba to zaległe dni) pozwala zagrać hasła z poprzednich dni. Punkty liczą się do dnia, którego dotyczą.</p>
+  <div class="actions"><button class="main" id="aClose">Gramy</button></div><p class="sub" style="text-align:center">Literalizator · wersja 9 · 2026-11-07</p>`);
 }
 function saveDay(){const k=curKey();
   if(mode==='arch'){const a=store.get('sd2_arch',{});day.late=true;a[k]=day;store.set('sd2_arch',a)}else store.set('sd2_day',day);
@@ -414,25 +494,25 @@ function loadDayLevel(){
   if(day.t[lvl]&&Date.now()-day.t[lvl]>TLIM*1000)timeupFired=curKey()+':'+lvl;
   paint();updTimer();
 }
-// ---- Zegar: 3 minuty od pierwszej litery, bonus zależny od poziomu
-const TB=[[20,15,10],[40,30,20],[60,45,30]], TLIM=180;
+// ---- Zegar: 5 minut od pierwszej litery, bonus maleje płynnie do zera
+const TMAX=[20,40,60], TLIM=300;
 const fmtT=ms=>{const x=Math.max(0,Math.floor(ms/1000));return Math.floor(x/60)+':'+String(x%60).padStart(2,'0')};
-const bonusFor=(L0,ms)=>ms<=60000?TB[L0][0]:ms<=120000?TB[L0][1]:ms<=TLIM*1000?TB[L0][2]:0;
+const bonusFor=(L0,ms)=>ms>=TLIM*1000?0:Math.max(0,Math.ceil(TMAX[L0]*(1-ms/(TLIM*1000))));
 let timeupFired=null;
 function updTimer(){const el=$('timer');if(!el)return;
   if(mode==='free'||!day||!day.t){el.hidden=true;return}
   el.hidden=false;el.className='timer';
   const st=day.t[lvl],te=day.te[lvl];
   if(done){if(te==null){el.hidden=true;return}
-    const b=day.tb[lvl];el.innerHTML='⏱ Czas '+fmtT(te)+' · '+(b?'bonus <b>+'+b+' pkt</b>':'bez bonusu za czas');return}
-  if(!st){el.innerHTML='⏱ 3:00 · start po pierwszej literze · bonus do <b>+'+TB[lvl][0]+'</b>';return}
+    const b=day.tb[lvl];el.innerHTML=ic('clock',14)+' Czas '+fmtT(te)+' · '+(b?'bonus <b>+'+b+' pkt</b>':'bez bonusu za czas');return}
+  if(!st){el.innerHTML=ic('clock',14)+' 5:00 · start po pierwszej literze · bonus do <b>+'+TMAX[lvl]+'</b><span class="tbar"><i style="width:100%"></i></span>';return}
   const e=Date.now()-st;
-  if(e>TLIM*1000){el.className='timer out';el.textContent='⏱ Czas minął · bez bonusu za czas';
+  if(e>TLIM*1000){el.className='timer out';el.innerHTML=ic('clock',14)+' Czas minął · bez bonusu za czas';
     const key=curKey()+':'+lvl;
-    if(timeupFired!==key){timeupFired=key;SFX.timeup();const t=$('toast');t.classList.add('big');toast('Minęły 3 minuty, bez bonusu',2400);setTimeout(()=>t.classList.remove('big'),2400)}
+    if(timeupFired!==key){timeupFired=key;SFX.timeup();const t=$('toast');t.classList.add('big');toast('Minęło 5 minut, bez bonusu',2400);setTimeout(()=>t.classList.remove('big'),2400)}
     return}
-  if((e%60000)>=30000)el.className='timer warn';
-  el.innerHTML='⏱ '+fmtT(TLIM*1000-e)+' · bonus <b>+'+bonusFor(lvl,e)+' pkt</b>';
+  if(TLIM*1000-e<60000)el.className='timer warn';
+  el.innerHTML=ic('clock',14)+' '+fmtT(TLIM*1000-e)+' · bonus <b>+'+bonusFor(lvl,e)+' pkt</b><span class="tbar"><i style="width:'+Math.max(0,100-e/(TLIM*10))+'%"></i></span>';
 }
 setInterval(updTimer,250);
 // ---- Archiwum poprzednich dni
@@ -448,7 +528,7 @@ function showArchive(){
   for(let t=today-DAY;t>=START;t-=DAY){const k=utcToKey(t),n=Math.round((t-START)/DAY),e=a[k];
     const res=(e&&e.res)||lg[k]||[null,null,null],p=((e&&e.pts)||h[k]||[0,0,0]).reduce((x,y)=>x+y,0);
     const fin=!!(res[2]||res.includes('lost')),started=res.some(Boolean)||!!(e&&e.g&&e.g.some(x=>x&&x.length));
-    const dots=res.map(r=>r==='won'?'🟩':r==='lost'?'🟥':'⬜').join('');
+    const dots=res.map(r=>`<i class="sq" style="background:${r==='won'?'#12a150':r==='lost'?'#e5484d':'var(--key)'}"></i>`).join('');
     const st=fin?'zakończony':started?'do dokończenia':'nierozegrany';
     rows+=`<button data-ak="${k}"><span>${fmt(t)}<small>#${n+1} · ${st}${e&&e.late?'<span class="tag">nadrobione</span>':''}</small></span><span class="dots">${dots}</span><span class="pt">${p} pkt</span></button>`}
   open(`<div class="step">Archiwum</div><h2>Poprzednie dni</h2><p class="sub">Zagraj hasła z dni, które Cię ominęły. Punkty liczą się do dnia, którego dotyczą. Dzisiejsze hasła trafią tu jutro.</p><div class="arch">${rows||'<p>Archiwum będzie dostępne od jutra.</p>'}</div><div class="actions"><button id="aClose">Zamknij</button></div>`);
@@ -466,8 +546,10 @@ document.addEventListener('keydown',e=>{
   else if(e.key.length===1)press(e.key.toLowerCase());
 });
 $('ov').addEventListener('click',e=>{if(e.target.id==='ov')close()});
+$('bArch').innerHTML=ic('cal',20)+'<span class="lbl">Archiwum</span><span class="badge" id="arBadge" hidden></span>';
 $('bHelp').onclick=showHelp;$('bArch').onclick=showArchive;$('bSnd').onclick=()=>{SFX.unlock();SFX.toggle();sndIcon()};sndIcon();$('bStats').onclick=()=>{if(mode!=='day'){setMode('day');toast('Wracasz do haseł dnia')}else showStats()};
 buildBoard();buildKb();loadDay();loadDayLevel();fitBoard();addEventListener('resize',fitBoard);if(window.visualViewport)visualViewport.addEventListener('resize',fitBoard);setTimeout(fitBoard,300);
+updBadge();
 if(!store.get('sd2_seen',false)){store.set('sd2_seen',true);showHelp()}
 else if(day.res[2]||day.res.includes('lost'))showStats();
 </script>
