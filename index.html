@@ -157,7 +157,7 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 .ico{display:inline-block;vertical-align:-3px;flex:none}
 .icon{display:inline-flex;align-items:center;justify-content:center;gap:5px;position:relative}
 .icon .lbl{display:none}
-@media (min-width:430px){#bArch .lbl{display:inline}}
+@media (min-width:430px){#bArch .lbl,#bDuel .lbl{display:inline}}
 .badge{position:absolute;top:-7px;right:-7px;background:#e5484d;color:#fff;border-radius:999px;font:800 .66rem var(--body);min-width:17px;height:17px;padding:0 4px;box-sizing:border-box;display:grid;place-items:center;line-height:1}
 .k.del{background:#ffd60a;border:1.5px solid #b39500;color:#000}
 .k.del .ico{vertical-align:middle}
@@ -212,6 +212,20 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 .lvt small{font-size:.74rem;line-height:1.2}
 @media (max-width:400px){.brand{font-size:.98rem;letter-spacing:.02em}.brand i{display:none}}
 @media (max-height:700px){.k,.k.go,.k.del{height:46px}.kb{gap:4px}}
+body.duel .top{background:#f3e8ff;border-radius:10px;padding:4px 6px}
+body.duel .lvl{color:#6d28d9}
+@media (prefers-color-scheme:dark){body.duel .top{background:#2e1065}body.duel .lvl{color:#c4b5fd}}
+.duelbtn{width:100%;border:2px solid #8b5cf6;border-radius:8px;padding:11px;font:800 .95rem var(--body);background:var(--panel);color:#6d28d9;cursor:pointer;display:inline-flex;gap:6px;justify-content:center;align-items:center}
+.dform{display:flex;flex-direction:column;gap:10px}
+.dform label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.9rem}
+.dform input{font:700 1.15rem var(--body);padding:10px 12px;border:2px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+#dWord{text-transform:uppercase;letter-spacing:.25em;font-size:1.4rem}
+.dok{color:#12a150;font-weight:700}.dbad{color:#e5484d;font-weight:700}
+.dlist{display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+.dlist div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding:4px 0}
+.dlink{display:flex;flex-direction:column;gap:6px;background:#f3e8ff;color:#3b0764;border-radius:8px;padding:10px}
+.dlink input{font:500 .8rem var(--body);padding:8px;border:1px solid #c4b5fd;border-radius:6px;width:100%;box-sizing:border-box}
+@media (max-width:400px){.brand{font-size:.84rem;letter-spacing:0}.icon{min-width:34px;padding:0 5px}}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
 .pt .ico{margin-right:3px}
 .tag{font-size:.68rem;background:var(--key);color:var(--ink);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
@@ -219,7 +233,7 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 
 <div class="app">
   <div class="top">
-    <button class="icon" id="bHelp" aria-label="Zasady">?</button><button class="icon" id="bSnd" aria-label="Dźwięk"></button><button class="icon" id="bArch" aria-label="Archiwum poprzednich dni"></button>
+    <button class="icon" id="bHelp" aria-label="Zasady">?</button><button class="icon" id="bSnd" aria-label="Dźwięk"></button><button class="icon" id="bArch" aria-label="Archiwum poprzednich dni"></button><button class="icon" id="bDuel" aria-label="Pojedynek"></button>
     <div class="lvt"><b id="lvName"></b><small id="lvSub"></small></div>
     <button class="icon" id="bStats" aria-label="Podsumowanie i wyniki">Wyniki</button>
   </div>
@@ -256,6 +270,7 @@ const SVG={
   sndOff:'<path d="M4 9.5h4l5-4v13l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/>',
   clock:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4.2l2.8 1.8M9.5 3h5"/>',
   lock:'<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  swords:'<path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M9.5 17.5L21 6V3h-3L6.5 14.5M11 19l-6-6M8 16l-4 4M5 21l-2-2"/>',
   joker:'<path d="M12 2.8l2.4 5.6 6 .6-4.5 4 1.3 6-5.2-3.1-5.2 3.1 1.3-6L3.6 9l6-.6z"/>',
   gift:'<rect x="3.5" y="9.5" width="17" height="11" rx="1.5"/><path d="M2.5 9.5h19v3.5h-19zM12 9.5v11M12 9.5C10 5 5.5 5 5.5 7.5S9 9.5 12 9.5zm0 0c2-4.5 6.5-4.5 6.5-2S15 9.5 12 9.5z"/>',
   del:'<path d="M9 5.5h11v13H9l-6-6.5z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>',
@@ -296,7 +311,7 @@ function dayNo(){return Math.round((keyToUTC(todayKey())-START)/DAY)}
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
 let mode='day', lvl=0, answer, guesses=[], cur='', done=false, busy=false;
-let day=null, freeLvl=0, archKey=null;
+let day=null, freeLvl=0, archKey=null, duel=null;
 const curN=()=>mode==='arch'?Math.round((keyToUTC(archKey)-START)/DAY):dayNo();
 const curKey=()=>mode==='arch'?archKey:todayKey();
 const shortDate=k=>{const p=k.split('-');return p[2]+'.'+p[1]};
@@ -338,11 +353,11 @@ function paint(){
 function paintLevels(){
   const play=mode!=='free', L0=play?lvl:freeLvl;
   $('lvName').innerHTML='<span class="brand"><i>L</i>LITERALIZATOR</span>';
-  const lvTxt=L0===3?'Niespodzianka':LV[L0].n+(play?'/3':'');
+  const lvTxt=duel?'Pojedynek · od: '+esc(duel.f):L0===3?'Niespodzianka':LV[L0].n+(play?'/3':'');
   const bs=$('bStats');bs.textContent=mode==='day'?'Wyniki':'Wyjdź';bs.classList.toggle('exit',mode!=='day');bs.setAttribute('aria-label',mode==='day'?'Podsumowanie i wyniki':'Wyjdź z treningu');
   const isWon=play?day.res[L0]==='won':(guesses.length&&guesses[guesses.length-1].w===answer);
   const att=done?(isWon?'Odgadnięte':'Hasło: '+answer.toUpperCase()):attemptLabel();
-  $('lvSub').innerHTML=(mode==='arch'?'Archiwum '+shortDate(archKey)+' · ':mode==='free'?'Trening · ':'')+'<span class="lvl">'+lvTxt+'</span> · '+att+(play?' · <span style="white-space:nowrap">'+(mode==='day'?'dziś ':'ten dzień ')+day.pts.reduce((a,b)=>a+b,0)+' pkt</span>':'');
+  $('lvSub').innerHTML=(mode==='arch'?'Archiwum '+shortDate(archKey)+' · ':mode==='free'?(duel?'':'Trening · '):'')+'<span class="lvl">'+lvTxt+'</span> · '+att+(play?' · <span style="white-space:nowrap">'+(mode==='day'?'dziś ':'ten dzień ')+day.pts.reduce((a,b)=>a+b,0)+' pkt</span>':'');
 }
 const COL={hit:'#12a150',near:'#ff8a00',miss:'#6b7280'};
 function setImp(el,prop,v){el.style.setProperty(prop,v,'important')}
@@ -400,6 +415,7 @@ function submit(){
   const s=score(cur,answer);guesses.push({w:cur,s});const won=cur===answer;cur='';
   busy=true;
   if(mode!=='free'){day.g[lvl]=guesses;saveDay()}
+  if(duel)duelSave({g:guesses});
   paint();
   const tiles=$('board').children[guesses.length-1].children;
   [...tiles].forEach((t,i)=>{t.style.animationDelay=(i*90)+'ms';t.classList.add('rev');SFX.tile(s[i],i*0.09)});
@@ -416,6 +432,7 @@ function finish(won){
     day.res[lvl]=won?'won':'lost';day.pts[lvl]=p;saveDay();
     const h=store.get('sd2_hist',{});h[curKey()]=day.pts.slice();store.set('sd2_hist',h);
   }
+  if(duel)duelSave({g:guesses,res:won?'won':'lost',pts:won?pointsFor(answer,guesses.length):0});
   paint();updTimer();
   if(won)SFX.win(0);else SFX.lose(0);
   toast(won?['Genialnie!','Wspaniale!','Świetnie!','Brawo!','Nieźle!','Uff, udało się!'][guesses.length-1]:'Hasło: '+answer.toUpperCase(),2000);
@@ -465,6 +482,10 @@ function showResult(won,p){
     if($('aSum'))$('aSum').onclick=showStats;
     if($('aP4'))$('aP4').onclick=startP4;
     if($('aNo'))$('aNo').onclick=showStats;
+  } else if(duel){
+    body=`<p>Hasło: ${word} (${v} pkt), zagadka od: ${esc(duel.f)}</p>`+(won?`<p>Twój wynik: <b>${pointsFor(answer,guesses.length)} pkt</b> (wartość słowa × premia ${7-guesses.length} za ${guesses.length}. próbę)</p>`:'<p>Tym razem się nie udało, ale możesz się zrewanżować!</p>');
+    open(`<div class="step">Pojedynek · zagadka od: ${esc(duel.f)}</div><h2>${head}</h2>${cel}${body}<div class="actions"><button class="main" id="aRev">${ic('swords',16)} Odbij piłeczkę: wymyśl hasło w rewanżu</button></div><button class="duelbtn" id="aDay">Zagraj w Literalizatora: 3 hasła dziennie</button><button class="linkbtn" id="aClose">Pokaż planszę</button>`);
+    $('aRev').onclick=showDuel;$('aDay').onclick=()=>setMode('day');
   } else {
     body=`<p>Hasło: ${word} · ${v} pkt</p><p class="sub">W treningu punkty się nie liczą.</p>`;
     open(`<div class="step">Trening · ${LV[freeLvl].n}</div><h2>${head}</h2>${cel}${body}<div class="actions"><button class="main" id="aAgain">Nowe słowo</button></div>${trainPicker()}<button class="linkbtn" id="aDay">Wróć do haseł dnia</button>`);
@@ -472,7 +493,7 @@ function showResult(won,p){
   }
 }
 function trainPicker(){return `<p class="sub">Trening (bez punktów), wybierz poziom:</p><div class="trainlv">${LV.map((l,i)=>`<button data-tl="${i}">${l.n}<br><small>${l.r}</small></button>`).join('')}</div>`}
-function bindTrain(){document.querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{if(mode==='arch')loadDay();freeLvl=+b.dataset.tl;mode='free';close();newFree()})}
+function bindTrain(){document.querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{if(mode==='arch')loadDay();endDuel();freeLvl=+b.dataset.tl;mode='free';close();newFree()})}
 function sumRange(h,from,to){let s=0;for(const k in h){const t=keyToUTC(k);if(t>=from&&t<=to)s+=h[k].reduce((a,b)=>a+b,0)}return s}
 function showStats(){
   if(!day)loadDay();
@@ -499,7 +520,7 @@ function showStats(){
   open(`${logo()}<div class="step">${mode==='arch'?'Archiwum · ':''}Strona 4 z 4 · Podsumowanie</div><h2>${mode==='arch'?'Dzień '+shortDate(archKey):'Podsumowanie dnia'}</h2>
   ${day.g.some(x=>x&&x.length)?'<p class="sub">Dotknij poziomu, żeby zobaczyć jego pełną planszę.</p>':''}<div class="daysum">${dayRows}</div>
   <div class="total"><span>${mode==='arch'?'Ten dzień razem':'Dziś razem'}</span><span>${day.pts.reduce((a,b)=>a+b,0)} pkt</span></div>
-  ${p4b}<div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${mode==='arch'||allDone?'Pokaż plansze':'Wróć do haseł dnia'}</button><button id="aArch">${ic('cal',16)} Archiwum${pend?' ('+pend+')':''}</button></div>
+  ${p4b}<button class="duelbtn" id="aDuel">${ic('swords',18)} Wyzwij znajomego na pojedynek</button><div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${mode==='arch'||allDone?'Pokaż plansze':'Wróć do haseł dnia'}</button><button id="aArch">${ic('cal',16)} Archiwum${pend?' ('+pend+')':''}</button></div>
   <div class="boards" id="boards" hidden>${boards}</div>
   ${pend?`<p class="sub">Zaległe dni w archiwum: <b>${pend}</b>. Możesz je nadrobić, punkty liczą się do dnia, którego dotyczą.</p>`:''}
   <h2>Twoje punkty</h2>
@@ -513,7 +534,7 @@ function showStats(){
   $('aReset').onclick=askReset;bindTrain();
   $('aShare').onclick=()=>{const m=mode;if(m==='free')mode='day';const t=shareText();mode=m;copy(t)};
   $('aBack').onclick=(mode==='arch'||allDone)?()=>{const b=$('boards');b.hidden=!b.hidden;$('aBack').textContent=b.hidden?'Pokaż plansze':'Ukryj plansze';if(!b.hidden)b.scrollIntoView({behavior:'smooth',block:'nearest'})}:()=>{close();if(mode==='free')setMode('day')};
-  $('aArch').onclick=showArchive;
+  $('aArch').onclick=showArchive;$('aDuel').onclick=showDuel;
   if($('aP4'))$('aP4').onclick=startP4;
   document.querySelectorAll('[data-lv]').forEach(d=>d.onclick=()=>{lvl=+d.dataset.lv;close();loadDayLevel();fitBoard()});
 }
@@ -536,6 +557,7 @@ function showHelp(){
   <p>Codziennie są trzy hasła. Każde jest warte więcej punktów, liczonych jak w Scrabble: <b>Poziom 1</b> to słowa za 5–8 pkt, <b>Poziom 2</b> za 9–11 pkt, <b>Poziom 3</b> za 12 pkt i więcej.</p>
   <p>Poziomy idą po kolei: poziom 2 odblokowuje się po odgadnięciu hasła z poziomu 1, a poziom 3 po odgadnięciu hasła z poziomu 2. Na końcu czeka podsumowanie dnia ze statystykami.</p>
   <p><b>Weekendowa niespodzianka.</b> W sobotę i niedzielę, po zakończeniu poziomu 3, gra zaproponuje dodatkowe hasło o trudności poziomu 3. Masz na nie 10 minut na bonus za czas (do 60 pkt) i możesz dorobić sobie ekstra punkty. Jeśli odmówisz, przycisk niespodzianki czeka w podsumowaniu do końca dnia.</p>
+  <p><b>Pojedynek.</b> Przycisk z mieczami u góry: wymyśl 5-literowe hasło, a gra zrobi z niego link do wysłania znajomemu (Messenger, SMS, WhatsApp). Znajomy zgaduje Twoje słowo w 6 próbach, bez zegara i jokerów. Pojedynki nie wpływają na punkty gry dnia.</p>
   <p><b>Joker.</b> Na poziomie 2, 3 i w niespodziance możesz odsłonić jedną literę hasła. Jokera dostajesz za polecenie gry znajomemu (jeden na poziom). Odsłonięta litera kosztuje tyle punktów, ile jest warta w Scrabble.</p>
   <p>Wynik = wartość słowa × premia za szybkość: 6 za odgadnięcie w 1. próbie, 5 w 2., i tak dalej do 1 w 6. próbie. Przykład: ŻÓŁTY (17 pkt) odgadnięty w 3. próbie daje 17 × 4 = 68 pkt.</p>
   <p><b>Bonus za czas.</b> Zegar 5:00 rusza po wpisaniu pierwszej litery danego poziomu i nie zatrzymuje się po wyjściu z gry. Bonus maleje płynnie z każdą sekundą: na starcie wynosi 20 pkt na poziomie 1, 40 pkt na poziomie 2 i 60 pkt na poziomie 3, a po 5 minutach spada do zera. Pasek pod zegarem pokazuje, ile jeszcze zostało. Po 5 minutach usłyszysz sygnał i grasz dalej, już bez bonusu za czas.</p>
@@ -544,7 +566,7 @@ function showHelp(){
   <table class="vals">${Object.keys(groups).sort((a,b)=>a-b).map(v=>`<tr><td>${v} pkt</td><td>${groups[v].join(' ')}</td></tr>`).join('')}</table>
   <p class="sub">Trening (na stronie podsumowania) losuje słowa z wybranego poziomu bez limitu; punkty w treningu się nie liczą.</p>
   <p class="sub">Archiwum (przycisk z kalendarzem u góry, czerwona liczba to zaległe dni) pozwala zagrać hasła z poprzednich dni. Punkty liczą się do dnia, którego dotyczą.</p>
-  <div class="actions"><button class="main" id="aClose">Gramy</button></div><p class="sub" style="text-align:center">Literalizator · wersja 10.1 · 2026-11-07</p>`);
+  <div class="actions"><button class="main" id="aClose">Gramy</button></div><p class="sub" style="text-align:center">Literalizator · wersja 11 · 2026-11-08</p>`);
 }
 function saveDay(){const k=curKey();
   if(mode==='arch'){const a=store.get('sd2_arch',{});day.late=true;a[k]=day;store.set('sd2_arch',a)}else store.set('sd2_day',day);
@@ -627,8 +649,52 @@ function jokerUse(cp){const pos=jokerPos(),c=answer[pos],cost=PV[c]||0;
   open(`<h2>${ic('joker',22)} Masz jokera!</h2>${cp?`<p class="sub">Link do gry jest w schowku: wklej go znajomemu w komunikatorze lub mailu.</p><p class="sub" style="user-select:all;word-break:break-all">${GAME_URL}</p>`:''}<p>Dziękuję za polecenie! Odsłonię literę na pozycji <b>${pos+1}</b>.</p><p>Koszt: <b>${cost} pkt</b>, odejmę je od wyniku tego poziomu.</p>
     <div class="actions"><button class="main" id="aUse">Odsłoń literę</button><button id="aClose">Zachowaj na później</button></div>`);
   $('aUse').onclick=()=>{day.jk[lvl]=2;day.jp[lvl]=pos;day.jc[lvl]=cost;saveDay();close();paint();toast('Litera nr '+(pos+1)+': '+c.toUpperCase(),2000)}}
+// ---- Pojedynek: hasło od znajomego zakodowane w linku (#p=...)
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DKEY=[...new TextEncoder().encode('literalizator-pojedynek')];
+function duelEncode(w,f){const b=new TextEncoder().encode(JSON.stringify({w,f,t:Date.now()%1e7}));let s='';b.forEach((x,i)=>s+=String.fromCharCode(x^DKEY[i%DKEY.length]^((i*7)&255)));
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function duelDecode(code){try{let s=atob(code.replace(/-/g,'+').replace(/_/g,'/'));const b=new Uint8Array([...s].map((c,i)=>c.charCodeAt(0)^DKEY[i%DKEY.length]^((i*7)&255)));
+  const o=JSON.parse(new TextDecoder().decode(b));if(!o||typeof o.w!=='string'||[...o.w].length!==5||!/^[a-ząćęłńóśźż]{5}$/.test(o.w))return null;
+  return {w:o.w,f:String(o.f||'Znajomy').slice(0,20)||'Znajomy'}}catch(e){return null}}
+function duelSave(part){const a=store.get('sd2_duels_in',{});a[duel.code]=Object.assign(a[duel.code]||{f:duel.f,ts:Date.now()},part);store.set('sd2_duels_in',a)}
+function clearHash(){try{if(location.hash)history.replaceState(null,'',location.pathname+location.search)}catch(e){}}
+function endDuel(){if(!duel)return;duel=null;document.body.classList.remove('duel');clearHash()}
+function startDuelFromHash(){const m=location.hash.match(/^#p=([A-Za-z0-9_-]+)$/);if(!m)return false;
+  const d=duelDecode(m[1]);if(!d){clearHash();toast('Ten link do pojedynku jest uszkodzony',2600);return false}
+  d.code=m[1].slice(0,60);const rec=store.get('sd2_duels_in',{})[d.code]||{};
+  duel=d;mode='free';answer=d.w;guesses=rec.g||[];cur='';done=!!rec.res;document.body.classList.add('duel');paint();fitBoard();
+  if(rec.res){showResult(rec.res==='won',rec.pts||0);return true}
+  open(`<h2>${ic('swords',26)} Pojedynek!</h2><p style="font-size:1.1rem"><b>${esc(d.f)}</b> ma dla Ciebie zagadkę w Literalizatorze.</p><p>Odgadnij 5-literowe hasło w 6 próbach. Zielony: litera na swoim miejscu, pomarańczowy: litera jest, ale gdzie indziej, szary: brak litery.</p><div class="actions"><button class="main" id="aGo">${guesses.length?'Graj dalej':'Zagraj'}</button></div>`);
+  $('aGo').onclick=()=>{SFX.unlock();close()};return true}
+function showDuel(){
+  const name=store.get('sd2_duel_name','');const out=store.get('sd2_duels_out',[]),inn=store.get('sd2_duels_in',{});
+  const outL=out.slice(0,15).map(x=>`<div><span><b>${esc(x.w.toUpperCase())}</b></span><span>${new Date(x.ts).toLocaleDateString('pl-PL')}</span></div>`).join('')||'<p class="sub">Jeszcze nic nie wysłano.</p>';
+  const inL=Object.values(inn).sort((a,b)=>b.ts-a.ts).slice(0,15).map(x=>`<div><span>od: <b>${esc(x.f)}</b></span><span>${x.res==='won'?'odgadnięte w '+x.g.length+'. próbie':x.res==='lost'?'nie udało się':'w trakcie'}</span></div>`).join('')||'<p class="sub">Jeszcze nikt Cię nie wyzwał.</p>';
+  open(`<h2>${ic('swords',24)} Pojedynek</h2><p>Wymyśl hasło dla znajomego i wyślij mu link. Odgaduje Twoje słowo w 6 próbach, jak w grze dnia, ale bez zegara i jokerów.</p>
+  <div class="dform"><label>Twój podpis<input id="dFrom" maxlength="20" value="${esc(name)}" placeholder="np. Radek" autocomplete="off"></label>
+  <label>Hasło dla znajomego (5 liter)<input id="dWord" maxlength="5" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+  <p class="sub" id="dInfo">Wpisz słowo, sprawdzę, czy jest w słowniku.</p></div>
+  <div class="actions"><button class="main" id="dSend">${ic('swords',16)} Wyślij zagadkę</button><button id="aClose">Zamknij</button></div><div id="dDone"></div>
+  <p><b>Wysłane zagadki</b></p><div class="dlist" id="dOut">${outL}</div><p><b>Odebrane zagadki</b></p><div class="dlist">${inL}</div>`);
+  const wi=$('dWord'),info=$('dInfo');
+  const chk=()=>{const w=wi.value.toLowerCase().replace(/[^a-ząćęłńóśźż]/g,'').slice(0,5);if(wi.value!==w)wi.value=w;
+    if(w.length<5){info.className='sub';info.textContent='Wpisz 5 liter ('+w.length+'/5).';return false}
+    if(!VALID.has(w)){info.className='dbad';info.textContent='Nie ma takiego słowa w słowniku gry.';return false}
+    const v=val(w);info.className='dok';info.textContent='✓ Słowo w słowniku · wartość '+v+' pkt · '+(v<=8?'łatwe':v<=11?'średnie':'trudne');return true};
+  wi.addEventListener('input',chk);
+  $('dSend').onclick=()=>{if(!chk()){wi.focus();return}
+    const f=($('dFrom').value.trim()||'Znajomy').slice(0,20),w=wi.value;store.set('sd2_duel_name',f);
+    const url=GAME_URL+'#p='+duelEncode(w,f),text=f+' wyzywa Cię na pojedynek w Literalizatorze! Odgadniesz moje hasło?';
+    const o=store.get('sd2_duels_out',[]);o.unshift({w,ts:Date.now()});store.set('sd2_duels_out',o.slice(0,50));
+    $('dDone').innerHTML=`<div class="dlink"><b>Zagadka gotowa!</b><span class="sub" style="color:inherit">Jeśli okno wysyłania się nie otworzyło, skopiuj link i wklej go znajomemu:</span><input id="dUrl" readonly value="${esc(url)}"><button class="main" id="dCopy" style="border:0;border-radius:8px;padding:10px;font-weight:700;background:#12a150;color:#fff">Kopiuj link</button></div>`;
+    $('dCopy').onclick=()=>{const i=$('dUrl');i.select();try{navigator.clipboard.writeText(text+' '+url).then(()=>{$('dCopy').textContent='Skopiowano ✓'},()=>{document.execCommand('copy');$('dCopy').textContent='Skopiowano ✓'})}catch(e){try{document.execCommand('copy');$('dCopy').textContent='Skopiowano ✓'}catch(_){}}};
+    const lo=$('dOut');if(lo){if(!o.length||lo.querySelector('p'))lo.innerHTML='';lo.insertAdjacentHTML('afterbegin',`<div><span><b>${esc(w.toUpperCase())}</b></span><span>${new Date().toLocaleDateString('pl-PL')}</span></div>`)}
+    wi.value='';info.className='sub';info.textContent='Możesz wymyślić kolejne hasło.';
+    try{if(navigator.share)navigator.share({title:'Pojedynek w Literalizatorze',text,url}).catch(()=>{})}catch(e){}};
+  setTimeout(()=>{(name?wi:$('dFrom')).focus()},50)}
 function newFree(){const pool=L[freeLvl];let a;do{a=pool[Math.floor(Math.random()*pool.length)]}while(a===answer);answer=a;guesses=[];cur='';done=false;paint();fitBoard()}
-function setMode(m){mode=m;close();
+function setMode(m){mode=m;close();endDuel();
   if(m==='day'){loadDay();loadDayLevel()}else{freeLvl=lvl;newFree()}}
 
 document.addEventListener('keydown',e=>{
@@ -640,11 +706,14 @@ document.addEventListener('keydown',e=>{
 });
 $('ov').addEventListener('click',e=>{if(e.target.id==='ov')close()});
 $('bArch').innerHTML=ic('cal',20)+'<span class="lbl">Archiwum</span><span class="badge" id="arBadge" hidden></span>';
+$('bDuel').innerHTML=ic('swords',20)+'<span class="lbl">Pojedynek</span>';$('bDuel').onclick=showDuel;
 $('bHelp').onclick=showHelp;$('bJoker').onclick=jokerClick;$('bArch').onclick=showArchive;$('bSnd').onclick=()=>{SFX.unlock();SFX.toggle();sndIcon()};sndIcon();$('bStats').onclick=()=>{if(mode!=='day'){setMode('day');toast('Wracasz do haseł dnia')}else showStats()};
 buildBoard();buildKb();loadDay();loadDayLevel();fitBoard();addEventListener('resize',fitBoard);if(window.visualViewport)visualViewport.addEventListener('resize',fitBoard);setTimeout(fitBoard,300);
 updBadge();
-if(!store.get('sd2_seen',false)){store.set('sd2_seen',true);showHelp()}
+if(startDuelFromHash()){store.set('sd2_seen',true)}
+else if(!store.get('sd2_seen',false)){store.set('sd2_seen',true);showHelp()}
 else if(done3(day)&&lvl!==3)showStats();
+addEventListener('hashchange',()=>{if(/^#p=/.test(location.hash)){close();startDuelFromHash()}});
 </script>
 
 </body>
