@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Literalizator – codzienna gra słowna</title>
-<meta name="description" content="Literalizator: 3 hasła dziennie, punkty jak w Scrabble i premia za szybkość. Gra w przeglądarce, bez instalacji.">
+<title>Literiada – codzienna gra słowna</title>
+<meta name="description" content="Literiada: 3 hasła dziennie, punkty jak w Scrabble i premia za szybkość. Gra w przeglądarce, bez instalacji.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Literalizator – codzienna gra słowna">
+<meta property="og:title" content="Literiada – codzienna gra słowna">
 <meta property="og:description" content="3 hasła dziennie, punkty jak w Scrabble, premia za szybkość. W weekend niespodzianka. Zagraj w przeglądarce, bez instalacji.">
-<meta property="og:url" content="https://godlewskiradoslaw-dot.github.io/literalizator/">
+<meta property="og:url" content="https://literiada.github.io/">
 <meta name="theme-color" content="#12a150">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2312a150'/%3E%3Ctext x='32' y='47' font-size='44' font-family='Arial Black,Arial' font-weight='900' text-anchor='middle' fill='white'%3EL%3C/text%3E%3C/svg%3E">
 <style>body{margin:0}[hidden]{display:none!important}</style>
@@ -183,7 +183,7 @@ table.vals td:last-child{text-transform:uppercase;letter-spacing:.08em}
 .brand{font-family:var(--display);font-weight:800;font-size:1.12rem;letter-spacing:.05em;display:inline-flex;align-items:center;gap:5px;line-height:1.1}
 .brand i{width:20px;height:20px;border-radius:4px;background:#12a150;color:#fff;display:grid;place-items:center;font-style:normal;font-size:.8rem}
 .logo{display:flex;gap:3px;justify-content:center;margin:2px 0 4px}
-.logo i{width:min(28px,calc((100vw - 64px)/13));aspect-ratio:1;border-radius:4px;display:grid;place-items:center;font:800 min(1rem,calc((100vw - 64px)/13*.62)) var(--display);color:#fff;font-style:normal}
+.logo i{width:min(34px,calc((100vw - 64px)/9));aspect-ratio:1;border-radius:5px;display:grid;place-items:center;font:800 min(1.25rem,calc((100vw - 64px)/9*.62)) var(--display);color:#fff;font-style:normal}
 .trow{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap}
 .jbtn{border:1.5px solid #8b5cf6;background:var(--panel);color:#6d28d9;border-radius:999px;font:800 .8rem var(--body);padding:3px 11px;display:inline-flex;gap:4px;align-items:center;cursor:pointer;min-height:28px}
 .jbtn.have{background:#8b5cf6;color:#fff}
@@ -226,6 +226,36 @@ body.duel .lvl{color:#6d28d9}
 .dlink{display:flex;flex-direction:column;gap:6px;background:#f3e8ff;color:#3b0764;border-radius:8px;padding:10px}
 .dlink input{font:500 .8rem var(--body);padding:8px;border:1px solid #c4b5fd;border-radius:6px;width:100%;box-sizing:border-box}
 @media (max-width:400px){.brand{font-size:.84rem;letter-spacing:0}.icon{min-width:34px;padding:0 5px}}
+/* v12: logo w pasku, panel boczny (menu), podsumowanie z paskami, eksport/import */
+.brandt{display:flex;gap:2px;justify-content:center}
+.brandt i{width:19px;height:19px;border-radius:3px;display:grid;place-items:center;font:800 .74rem var(--display);font-style:normal;color:#fff}
+@media (max-width:360px){.brandt i{width:16px;height:16px;font-size:.66rem}}
+.top .icon.menu{position:relative}
+.mdot{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:#e5484d;border:2px solid var(--bg)}
+#side{position:fixed;top:0;bottom:0;left:0;width:260px;max-width:84vw;background:var(--panel);border-right:1px solid var(--line);z-index:36;transform:translateX(-104%);transition:transform .22s ease;display:flex;flex-direction:column;gap:2px;padding:calc(10px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px));box-sizing:border-box;overflow:auto;visibility:hidden}
+body.side-on #side{transform:none;visibility:visible}
+#sideBg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35}
+.shead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 10px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.sitem{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:var(--ink);font:600 1rem var(--body);padding:12px 10px;border-radius:8px;cursor:pointer;text-align:left}
+.sitem:hover,.sitem:focus-visible{background:var(--key)}
+.sitem .badge{position:static;margin-left:auto}
+.ssep{border-top:1px solid var(--line);margin:6px 0}
+.sfoot{margin-top:auto;font-size:.75rem;color:var(--muted);padding:10px}
+@media (min-width:1100px){#sideBg{display:none!important}body.side-on .ov{left:260px}}
+.hint{position:fixed;z-index:37;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:10px;font:600 .9rem var(--body);max-width:250px;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;line-height:1.35}
+.hint::before{content:"";position:absolute;top:-7px;left:14px;border:7px solid transparent;border-top:0;border-bottom-color:var(--ink)}
+.daysum div{grid-template-columns:auto minmax(0,1fr) auto}
+.daysum div.lostr .w{color:var(--muted)}
+.daysum .pt{white-space:nowrap}
+.daysum div[data-tog] .chev{display:inline-block;transition:transform .2s;color:var(--muted)}
+.daysum div.openr .chev{transform:rotate(180deg)}
+.daysum div[data-play]{cursor:pointer;border-style:dashed}
+.daysum .lvn{font-weight:800;font-family:var(--display)}
+.boards{width:min(94vw,820px);align-self:center}
+@media (min-width:700px){.boards{flex-direction:row;flex-wrap:wrap;justify-content:center}.boards .bl{flex:0 1 200px}.boards .mini i{width:30px;height:30px}}
+.mv textarea{width:100%;box-sizing:border-box;font:.78rem ui-monospace,monospace;padding:8px;border:2px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);resize:vertical}
+.mvbox{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.dres{font-size:.8rem;color:var(--muted);display:block;text-align:right}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:40}
 .pt .ico{margin-right:3px}
 .tag{font-size:.68rem;background:var(--key);color:var(--ink);border-radius:4px;padding:1px 6px;margin-left:6px;font-weight:600}
@@ -233,15 +263,27 @@ body.duel .lvl{color:#6d28d9}
 
 <div class="app">
   <div class="top">
-    <button class="icon" id="bHelp" aria-label="Zasady">?</button><button class="icon" id="bSnd" aria-label="Dźwięk"></button><button class="icon" id="bArch" aria-label="Archiwum poprzednich dni"></button><button class="icon" id="bDuel" aria-label="Pojedynek"></button>
+    <button class="icon menu" id="bMenu" aria-label="Menu" aria-controls="side" aria-expanded="false"></button>
     <div class="lvt"><b id="lvName"></b><small id="lvSub"></small></div>
-    <button class="icon" id="bStats" aria-label="Podsumowanie i wyniki">Wyniki</button>
+    <button class="icon" id="bSnd" aria-label="Dźwięk"></button><button class="icon exit" id="bStats" aria-label="Wróć do haseł dnia" hidden>Wyjdź</button>
   </div>
   <div class="trow"><div class="timer" id="timer" hidden></div><button class="jbtn" id="bJoker" hidden></button></div>
   <div class="jstrip" id="jstrip" hidden></div>
   <div class="board-wrap"><div class="board" id="board"></div></div>
   <div class="kb" id="kb"></div>
 </div>
+<div id="sideBg" hidden></div>
+<nav id="side" aria-label="Menu gry">
+  <div class="shead"><span id="sLogo"></span><button class="icon" id="sClose" aria-label="Zwiń menu"></button></div>
+  <button class="sitem" id="sStats"></button>
+  <button class="sitem" id="sArch"></button>
+  <button class="sitem" id="sDuel"></button>
+  <button class="sitem" id="sTrain"></button>
+  <div class="ssep"></div>
+  <button class="sitem" id="sHelp"></button>
+  <button class="sitem" id="sMove"></button>
+  <div class="sfoot">Literiada · wersja 12 · 2026-11-11</div>
+</nav>
 <div class="toast" id="toast" hidden></div>
 <div class="ov" id="ov" hidden><div class="card" id="card"></div></div>
 
@@ -275,6 +317,14 @@ const SVG={
   gift:'<rect x="3.5" y="9.5" width="17" height="11" rx="1.5"/><path d="M2.5 9.5h19v3.5h-19zM12 9.5v11M12 9.5C10 5 5.5 5 5.5 7.5S9 9.5 12 9.5zm0 0c2-4.5 6.5-4.5 6.5-2S15 9.5 12 9.5z"/>',
   del:'<path d="M9 5.5h11v13H9l-6-6.5z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>',
   bolt:'<path d="M13.5 2.5L5 13.5h6l-1.5 8 8.5-11h-6z" fill="currentColor"/>',
+  menu:'<path d="M4 6.5h16M4 12h16M4 17.5h16"/>',
+  chart:'<path d="M5 20V11M12 20V4M19 20v-7"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .8-1 1.5v.6M12 17h.01"/>',
+  train:'<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4h4"/>',
+  move:'<path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"/>',
+  back:'<path d="M14.5 6l-6 6 6 6"/>',
+  chev:'<path d="M6 9.5l6 6 6-6"/>',
+  send:'<path d="M3.5 11.5L20.5 4l-7.5 17-2.5-7z"/>',
   sun:'<path d="M3 18h18M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M12 6.5v2.5M5.2 9.7l1.8 1.8M18.8 9.7L17 11.5M3 14h1.5M19.5 14H21"/>'};
 const ic=(n,s=18)=>`<svg class="ico" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SVG[n]}</svg>`;
 const MED={gold:['#f6cf45','#c99a06','#fff3b8'],silver:['#dfe3e8','#98a2ad','#ffffff'],bronze:['#e4a46a','#a5652e','#ffd9b5']};
@@ -283,8 +333,9 @@ const medalName={gold:'złoty medal',silver:'srebrny medal',bronze:'brązowy med
 function medal(kind,s=72){const [f,d,h]=MED[kind];
   return `<svg class="${s>30?'medal':'ico'}" width="${s}" height="${s}" viewBox="0 0 64 64" aria-label="${medalName[kind]}"><path d="M20 2h10l6 20h-10z" fill="#e5484d"/><path d="M44 2H34l-6 20h10z" fill="#3b82f6"/><circle cx="32" cy="40" r="20" fill="${d}"/><circle cx="32" cy="40" r="16" fill="${f}"/><path d="M32 29.5l3.2 6.6 7.2 1-5.2 5 1.3 7.2-6.5-3.4-6.5 3.4 1.3-7.2-5.2-5 7.2-1z" fill="${h}" stroke="${d}" stroke-width="1.2" stroke-linejoin="round"/></svg>`}
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-const LOGO_C=['#12a150','#ff8a00','#6b7280','#12a150','#12a150','#ff8a00','#12a150','#6b7280','#12a150','#ff8a00','#12a150','#12a150','#6b7280'];
-const logo=()=>`<div class="logo" aria-label="Literalizator">${[...'LITERALIZATOR'].map((c,i)=>`<i style="background:${LOGO_C[i]}">${c}</i>`).join('')}</div>`;
+const LOGO_C=['#12a150','#ff8a00','#6b7280','#12a150','#ff8a00','#6b7280','#12a150','#ff8a00','#12a150'];
+const logo=()=>`<div class="logo" aria-label="Literiada">${[...'LITERIADA'].map((c,i)=>`<i style="background:${LOGO_C[i]}">${c}</i>`).join('')}</div>`;
+const brandT=()=>`<span class="brandt" aria-label="Literiada">${[...'LITERIADA'].map((c,i)=>`<i style="background:${LOGO_C[i]}">${c}</i>`).join('')}</span>`;
 const CHEER={gold:['Mistrzostwo!','Słownik drży przed Tobą.','Czytasz w myślach?','Jak z nut!'],
   silver:['Pewna ręka!','Solidna robota.','Tak się to robi!','Klasa!'],
   bronze:['Uff, ale się udało!','Liczy się wynik!','Wytrwałość popłaca.','Na styk, ale w punkt!'],
@@ -352,9 +403,9 @@ function paint(){
 }
 function paintLevels(){
   const play=mode!=='free', L0=play?lvl:freeLvl;
-  $('lvName').innerHTML='<span class="brand"><i>L</i>LITERALIZATOR</span>';
+  $('lvName').innerHTML=brandT();
   const lvTxt=duel?'Pojedynek · od: '+esc(duel.f):L0===3?'Niespodzianka':LV[L0].n+(play?'/3':'');
-  const bs=$('bStats');bs.textContent=mode==='day'?'Wyniki':'Wyjdź';bs.classList.toggle('exit',mode!=='day');bs.setAttribute('aria-label',mode==='day'?'Podsumowanie i wyniki':'Wyjdź z treningu');
+  $('bStats').hidden=mode==='day';
   const isWon=play?day.res[L0]==='won':(guesses.length&&guesses[guesses.length-1].w===answer);
   const att=done?(isWon?'Odgadnięte':'Hasło: '+answer.toUpperCase()):attemptLabel();
   $('lvSub').innerHTML=(mode==='arch'?'Archiwum '+shortDate(archKey)+' · ':mode==='free'?(duel?'':'Trening · '):'')+'<span class="lvl">'+lvTxt+'</span> · '+att+(play?' · <span style="white-space:nowrap">'+(mode==='day'?'dziś ':'ten dzień ')+day.pts.reduce((a,b)=>a+b,0)+' pkt</span>':'');
@@ -440,8 +491,8 @@ function finish(won){
 }
 function grid(g){return g.map(x=>x.s.map(s=>s==='hit'?'🟩':s==='near'?'🟨':'⬜').join('')).join('\n')}
 function shareText(){
-  if(mode==='free'){const won=(guesses.length&&guesses[guesses.length-1].w===answer);return 'Literalizator (trening, '+LV[freeLvl].n.toLowerCase()+') '+(won?guesses.length:'X')+'/6\n\n'+grid(guesses)}
-  let t='Literalizator #'+(curN()+1)+' · '+day.pts.reduce((a,b)=>a+b,0)+' pkt\n';
+  if(mode==='free'){const won=(guesses.length&&guesses[guesses.length-1].w===answer);return 'Literiada (trening, '+LV[freeLvl].n.toLowerCase()+') '+(won?guesses.length:'X')+'/6\n\n'+grid(guesses)}
+  let t='Literiada #'+(curN()+1)+' · '+day.pts.reduce((a,b)=>a+b,0)+' pkt\n';
   day.res.forEach((r,i)=>{if(!r)return;const g=day.g[i];t+='\nP'+(i+1)+': '+(r==='won'?(g.length||'✓'):'X')+'/6 · '+day.pts[i]+' pkt'+(day.te&&day.te[i]!=null?' · ⏱'+fmtT(day.te[i]):'')+'\n'+grid(g)+'\n'});
   return t.trim();
 }
@@ -450,9 +501,9 @@ function fallback(text){const a=document.createElement('textarea');a.value=text;
 function archPending(){const a=store.get('sd2_arch',{}),lg=store.get('sd2_log',{}),today=keyToUTC(todayKey());let n=0;
   for(let t=today-DAY;t>=START;t-=DAY){const k=utcToKey(t),e=a[k],res=(e&&e.res)||lg[k]||[null,null,null];if(!(res[2]||res.slice(0,3).includes('lost')))n++}return n}
 function updBadge(){const n=archPending(),b=$('arBadge');if(!b)return;b.hidden=!n;b.textContent=n;
-  $('bArch').title=n?'Archiwum · zaległe dni: '+n:'Archiwum poprzednich dni'}
-function close(){$('ov').hidden=true;updBadge()}
-function open(html){$('card').innerHTML=html;$('ov').hidden=false;const c=$('aClose');if(c)c.onclick=close}
+  $('sArch').title=n?'Archiwum · zaległe dni: '+n:'Archiwum poprzednich dni';const d=$('mDot');if(d)d.hidden=!n||document.body.classList.contains('side-on')}
+function close(){$('ov').hidden=true;updBadge();setTimeout(menuHint,400)}
+function open(html){document.querySelectorAll('.hint').forEach(h=>h.remove());$('card').innerHTML=html;$('ov').hidden=false;const c=$('aClose');if(c)c.onclick=close}
 
 function showResult(won,p){
   const v=val(answer), word=`<span class="answer">${answer}</span>`;
@@ -484,8 +535,13 @@ function showResult(won,p){
     if($('aNo'))$('aNo').onclick=showStats;
   } else if(duel){
     body=`<p>Hasło: ${word} (${v} pkt), zagadka od: ${esc(duel.f)}</p>`+(won?`<p>Twój wynik: <b>${pointsFor(answer,guesses.length)} pkt</b> (wartość słowa × premia ${7-guesses.length} za ${guesses.length}. próbę)</p>`:'<p>Tym razem się nie udało, ale możesz się zrewanżować!</p>');
-    open(`<div class="step">Pojedynek · zagadka od: ${esc(duel.f)}</div><h2>${head}</h2>${cel}${body}<div class="actions"><button class="main" id="aRev">${ic('swords',16)} Odbij piłeczkę: wymyśl hasło w rewanżu</button></div><button class="duelbtn" id="aDay">Zagraj w Literalizatora: 3 hasła dziennie</button><button class="linkbtn" id="aClose">Pokaż planszę</button>`);
-    $('aRev').onclick=showDuel;$('aDay').onclick=()=>setMode('day');
+    const nm=store.get('sd2_duel_name','');
+    open(`<div class="step">Pojedynek · zagadka od: ${esc(duel.f)}</div><h2>${head}</h2>${cel}${body}
+    <div class="dlink"><b>${ic('send',16)} Odeślij wynik do: ${esc(duel.f)}</b><span class="sub" style="color:inherit">${esc(duel.f)} zobaczy Twoją planszę i liczbę prób.</span>
+    <label style="display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.85rem">Twój podpis<input id="rName" maxlength="20" value="${esc(nm)}" placeholder="np. Ania" autocomplete="off"></label>
+    <button class="main" id="aRet" style="border:0;border-radius:8px;padding:10px;font-weight:700;background:#8b5cf6;color:#fff">Odeślij wynik</button><div id="rDone"></div></div>
+    <div class="actions"><button class="main" id="aRev">${ic('swords',16)} Odbij piłeczkę: wymyśl hasło w rewanżu</button></div><button class="duelbtn" id="aDay">Zagraj w Literiadę: 3 hasła dziennie</button><button class="linkbtn" id="aClose">Pokaż planszę</button>`);
+    $('aRev').onclick=showDuel;$('aDay').onclick=()=>setMode('day');$('aRet').onclick=()=>sendResult(won);
   } else {
     body=`<p>Hasło: ${word} · ${v} pkt</p><p class="sub">W treningu punkty się nie liczą.</p>`;
     open(`<div class="step">Trening · ${LV[freeLvl].n}</div><h2>${head}</h2>${cel}${body}<div class="actions"><button class="main" id="aAgain">Nowe słowo</button></div>${trainPicker()}<button class="linkbtn" id="aDay">Wróć do haseł dnia</button>`);
@@ -508,19 +564,21 @@ function showStats(){
   const lg=store.get('sd2_log',{});for(const k in lg)lg[k].forEach((r,i)=>{if(r){played[i]++;if(r==='won')won[i]++}});
   const month=new Date(t).toLocaleDateString('pl-PL',{month:'long',timeZone:'UTC'});
   const dayRows=LVA.slice(0,isWknd(curKey())?4:3).map((l,i)=>{const r=day.res[i],g=day.g[i]||[];const w=wordFor(i,curN());
-    const word=r?w:(unlocked(i)?'…':ic('lock',15));const note=r==='won'?(g.length?'odgadnięte w '+g.length+'. próbie':'odgadnięte'):r==='lost'?'nie udało się':unlocked(i)?'jeszcze nie rozwiązane':i===3?'po zakończeniu poziomu 3':'zablokowane';
-    const mini=g.length?`<span class="mini">${g.map(x=>`<span class="mr">${[...x.w].map((ch,j)=>`<i style="background:${COL[x.s[j]]}">${ch}</i>`).join('')}</span>`).join('')}</span>`:'';
-    return `<div${g.length?` data-lv="${i}"`:''}><span>${l.n}</span><span class="w">${word}<small>${note}${day.te&&day.te[i]!=null&&r?' · '+ic('clock',12)+' '+fmtT(day.te[i])+(day.tb[i]?' (+'+day.tb[i]+')':''):''}</small></span><span class="pt">${r==='won'&&g.length?medal(medalKind(g.length),18):''}${day.pts[i]} pkt</span>${mini}</div>`}).join('');
+    const word=r?w:(unlocked(i)?'…':ic('lock',15));const note=r==='won'?(g.length?'odgadnięte w '+g.length+'. próbie':'odgadnięte'):r==='lost'?'nie odgadnięte':unlocked(i)?(g.length?'w trakcie · dotknij, żeby grać':'dotknij, żeby grać'):i===3?'po zakończeniu poziomu 3':'zablokowane';
+    const mini=g.length&&r?`<span class="mini" hidden>${g.map(x=>`<span class="mr">${[...x.w].map((ch,j)=>`<i style="background:${COL[x.s[j]]}">${ch}</i>`).join('')}</span>`).join('')}</span>`:'';
+    const act=g.length&&r?` data-tog="${i}" role="button" tabindex="0" aria-expanded="false"`:(!r&&unlocked(i))?` data-play="${i}" role="button" tabindex="0"`:'';
+    return `<div${act} class="${r==='lost'?'lostr':''}"><span class="lvn">${i===3?'P4':'P'+(i+1)}</span><span class="w">${word}<small>${note}${day.te&&day.te[i]!=null&&r?' · '+ic('clock',12)+' '+fmtT(day.te[i])+(day.tb[i]?' (+'+day.tb[i]+')':''):''}</small></span><span class="pt">${r==='won'&&g.length?medal(medalKind(g.length),18):''}${day.pts[i]} pkt${mini?' <span class="chev">'+ic('chev',16)+'</span>':''}</span>${mini}</div>`}).join('');
   const boards=day.g.some(x=>x&&x.length)?LVA.map((l,i)=>{const g=day.g[i]||[],r=day.res[i];if(!g.length)return '';const w=wordFor(i,curN());
     return `<div class="bl"><div class="bh"><span>${l.n} · <span class="w">${r?w:'w trakcie'}</span></span><span>${r==='won'?medal(medalKind(g.length),18):''}${day.pts[i]} pkt</span></div><span class="mini">${g.map(x=>`<span class="mr">${[...x.w].map((ch,j)=>`<i style="background:${COL[x.s[j]]}">${ch}</i>`).join('')}</span>`).join('')}</span></div>`}).join('')
     :'<p class="sub">Plansze z tego dnia nie zostały zapisane: ten dzień rozegrano w starszej wersji gry, która zapamiętywała tylko wynik. Punkty są policzone.</p>';
   const pend=archPending();
   const allDone=done3(day)&&!p4going(day);
+  const anyB=day.g.some(x=>x&&x.length)||day.res.some(Boolean);
   const p4b=p4open()&&!day.res[3]?`<button class="p4btn" id="aP4">${ic('gift',18)} ${day.g[3].length?'Wróć do weekendowej niespodzianki':'Weekendowa niespodzianka: zagraj!'}</button>`:'';
   open(`${logo()}<div class="step">${mode==='arch'?'Archiwum · ':''}Strona 4 z 4 · Podsumowanie</div><h2>${mode==='arch'?'Dzień '+shortDate(archKey):'Podsumowanie dnia'}</h2>
-  ${day.g.some(x=>x&&x.length)?'<p class="sub">Dotknij poziomu, żeby zobaczyć jego pełną planszę.</p>':''}<div class="daysum">${dayRows}</div>
+  ${day.g.some(x=>x&&x.length)?'<p class="sub">Dotknij paska poziomu, żeby rozwinąć jego planszę.</p>':''}<div class="daysum">${dayRows}</div>
   <div class="total"><span>${mode==='arch'?'Ten dzień razem':'Dziś razem'}</span><span>${day.pts.reduce((a,b)=>a+b,0)} pkt</span></div>
-  ${p4b}<button class="duelbtn" id="aDuel">${ic('swords',18)} Wyzwij znajomego na pojedynek</button><div class="actions"><button class="main" id="aShare">Kopiuj wynik</button><button id="aBack">${mode==='arch'||allDone?'Pokaż plansze':'Wróć do haseł dnia'}</button><button id="aArch">${ic('cal',16)} Archiwum${pend?' ('+pend+')':''}</button></div>
+  ${p4b}<button class="duelbtn" id="aDuel">${ic('swords',18)} Wyzwij znajomego na pojedynek</button><div class="actions"><button class="main" id="aShare">Kopiuj wynik</button>${anyB?'<button id="aBoards">Zobacz plansze</button>':''}${!allDone?'<button id="aBack">Wróć do gry</button>':''}<button id="aArch">${ic('cal',16)} Archiwum${pend?' ('+pend+')':''}</button></div>
   <div class="boards" id="boards" hidden>${boards}</div>
   ${pend?`<p class="sub">Zaległe dni w archiwum: <b>${pend}</b>. Możesz je nadrobić, punkty liczą się do dnia, którego dotyczą.</p>`:''}
   <h2>Twoje punkty</h2>
@@ -528,15 +586,17 @@ function showStats(){
   <div class="week">${days.map((d,i)=>{const s=sumP(d.p);return `<div>${s||''}<i style="height:${s/mx*80}%">${d.p.map((p,j)=>p?`<s class="c${j+1}" style="height:${p/s*100}%"></s>`:'').join('')}</i>${names[i]}</div>`}).join('')}</div>
   <div class="legend"><span style="--c:var(--hit)">Poziom 1</span><span style="--c:var(--near)">Poziom 2</span><span style="--c:var(--ink)">Poziom 3</span>${played[3]?'<span style="--c:#8b5cf6">Niespodzianka</span>':''}</div>
   <div class="lvres">${LVA.map((l,i)=>i===3&&!played[3]?'':`<div><span>${l.n} (${l.r})</span><b>${won[i]} z ${played[i]} odgadniętych</b></div>`).join('')}</div>
-  <p class="sub">Tydzień liczony od poniedziałku. Wyniki zapisują się w tej przeglądarce.</p>
+  <p class="sub">Tydzień liczony od poniedziałku. Wyniki zapisują się w tej przeglądarce. Przeniesiesz je na inne urządzenie w menu: Przenieś wyniki.</p>
   <h2>Trening</h2>${trainPicker()}
   <button class="linkbtn" id="aReset">Zacznij od nowa (wyzeruj wyniki)</button>`);
   $('aReset').onclick=askReset;bindTrain();
   $('aShare').onclick=()=>{const m=mode;if(m==='free')mode='day';const t=shareText();mode=m;copy(t)};
-  $('aBack').onclick=(mode==='arch'||allDone)?()=>{const b=$('boards');b.hidden=!b.hidden;$('aBack').textContent=b.hidden?'Pokaż plansze':'Ukryj plansze';if(!b.hidden)b.scrollIntoView({behavior:'smooth',block:'nearest'})}:()=>{close();if(mode==='free')setMode('day')};
+  if($('aBoards'))$('aBoards').onclick=()=>{const b=$('boards');b.hidden=!b.hidden;$('aBoards').textContent=b.hidden?'Zobacz plansze':'Ukryj plansze';if(!b.hidden)b.scrollIntoView({behavior:'smooth',block:'nearest'})};
+  if($('aBack'))$('aBack').onclick=()=>{close();if(mode==='free')setMode('day')};
   $('aArch').onclick=showArchive;$('aDuel').onclick=showDuel;
   if($('aP4'))$('aP4').onclick=startP4;
-  document.querySelectorAll('[data-lv]').forEach(d=>d.onclick=()=>{lvl=+d.dataset.lv;close();loadDayLevel();fitBoard()});
+  document.querySelectorAll('[data-tog]').forEach(d=>{const f=()=>{const m=d.querySelector('.mini');m.hidden=!m.hidden;d.classList.toggle('openr',!m.hidden);d.setAttribute('aria-expanded',String(!m.hidden))};d.onclick=f;d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}}});
+  document.querySelectorAll('[data-play]').forEach(d=>{const f=()=>{lvl=+d.dataset.play;close();loadDayLevel();fitBoard()};d.onclick=f;d.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();f()}}});
 }
 function askReset(){
   open(`<h2>Zacząć od nowa?</h2><p>Usunę wszystkie punkty, statystyki i dzisiejsze postępy na wszystkich poziomach. Tego nie da się cofnąć.</p>
@@ -552,21 +612,22 @@ function showHelp(){
   ${ex('kubek',['hit'])}<p><b>K</b> jest w słowie i stoi na dobrym miejscu (zielony).</p>
   ${ex('rondo',['','near'])}<p><b>O</b> jest w słowie, ale w innym miejscu (pomarańczowy).</p>
   ${ex('zegar',['','','miss'])}<p><b>G</b> nie występuje w słowie. Na klawiaturze taka litera staje się blada, przekreślona i w przerywanej ramce.</p>
-  <p class="sub">Dźwięki: wysoki dzwonek za zieloną literę, niższy za pomarańczową, głuche puknięcie za pudło, „bzyczenie” gdy w próbie nic nie trafiłeś, fanfary za odgadnięte hasło i smutna trąbka za przegrany poziom. Wyciszysz je przyciskiem z głośnikiem u góry.</p>
+  <p class="sub">Dźwięki: wysoki dzwonek za zieloną literę, niższy za pomarańczową, głuche puknięcie za pudło, „bzyczenie” gdy w próbie nic nie trafiłeś, fanfary za odgadnięte hasło i smutna trąbka za przegrany poziom. Wyciszysz je przyciskiem z głośnikiem w prawym górnym rogu.</p>
+  <p><b>Menu.</b> Przycisk ☰ w lewym górnym rogu otwiera menu: podsumowanie i wyniki, archiwum, pojedynek, trening, zasady i przenoszenie wyników. Na komputerze menu może stać na stałe z boku planszy.</p>
   <h2>Poziomy i punkty</h2>
   <p>Codziennie są trzy hasła. Każde jest warte więcej punktów, liczonych jak w Scrabble: <b>Poziom 1</b> to słowa za 5–8 pkt, <b>Poziom 2</b> za 9–11 pkt, <b>Poziom 3</b> za 12 pkt i więcej.</p>
   <p>Poziomy idą po kolei: poziom 2 odblokowuje się po odgadnięciu hasła z poziomu 1, a poziom 3 po odgadnięciu hasła z poziomu 2. Na końcu czeka podsumowanie dnia ze statystykami.</p>
   <p><b>Weekendowa niespodzianka.</b> W sobotę i niedzielę, po zakończeniu poziomu 3, gra zaproponuje dodatkowe hasło o trudności poziomu 3. Masz na nie 10 minut na bonus za czas (do 60 pkt) i możesz dorobić sobie ekstra punkty. Jeśli odmówisz, przycisk niespodzianki czeka w podsumowaniu do końca dnia.</p>
-  <p><b>Pojedynek.</b> Przycisk z mieczami u góry: wymyśl 5-literowe hasło, a gra zrobi z niego link do wysłania znajomemu (Messenger, SMS, WhatsApp). Znajomy zgaduje Twoje słowo w 6 próbach, bez zegara i jokerów. Pojedynki nie wpływają na punkty gry dnia.</p>
+  <p><b>Pojedynek.</b> W menu wybierz Pojedynek: wymyśl 5-literowe hasło, a gra zrobi z niego link do wysłania znajomemu (Messenger, SMS, WhatsApp). Znajomy zgaduje Twoje słowo w 6 próbach, bez zegara i jokerów, a potem może odesłać Ci link ze swoim wynikiem i planszą. Pojedynki nie wpływają na punkty gry dnia.</p>
   <p><b>Joker.</b> Na poziomie 2, 3 i w niespodziance możesz odsłonić jedną literę hasła. Jokera dostajesz za polecenie gry znajomemu (jeden na poziom). Odsłonięta litera kosztuje tyle punktów, ile jest warta w Scrabble.</p>
   <p>Wynik = wartość słowa × premia za szybkość: 6 za odgadnięcie w 1. próbie, 5 w 2., i tak dalej do 1 w 6. próbie. Przykład: ŻÓŁTY (17 pkt) odgadnięty w 3. próbie daje 17 × 4 = 68 pkt.</p>
   <p><b>Bonus za czas.</b> Zegar 5:00 rusza po wpisaniu pierwszej litery danego poziomu i nie zatrzymuje się po wyjściu z gry. Bonus maleje płynnie z każdą sekundą: na starcie wynosi 20 pkt na poziomie 1, 40 pkt na poziomie 2 i 60 pkt na poziomie 3, a po 5 minutach spada do zera. Pasek pod zegarem pokazuje, ile jeszcze zostało. Po 5 minutach usłyszysz sygnał i grasz dalej, już bez bonusu za czas.</p>
   <p><b>Medale.</b> Za odgadnięte hasło dostajesz medal: złoty za 1–2 próby, srebrny za 3–4, brązowy za 5–6. Jeśli zgarniesz co najmniej połowę bonusu za czas, dochodzi Błyskawica.</p>
   <p class="sub">Wartości liter (do liczenia punktów):</p>
   <table class="vals">${Object.keys(groups).sort((a,b)=>a-b).map(v=>`<tr><td>${v} pkt</td><td>${groups[v].join(' ')}</td></tr>`).join('')}</table>
-  <p class="sub">Trening (na stronie podsumowania) losuje słowa z wybranego poziomu bez limitu; punkty w treningu się nie liczą.</p>
-  <p class="sub">Archiwum (przycisk z kalendarzem u góry, czerwona liczba to zaległe dni) pozwala zagrać hasła z poprzednich dni. Punkty liczą się do dnia, którego dotyczą.</p>
-  <div class="actions"><button class="main" id="aClose">Gramy</button></div><p class="sub" style="text-align:center">Literalizator · wersja 11 · 2026-11-08</p>`);
+  <p class="sub">Trening (w menu i na stronie podsumowania) losuje słowa z wybranego poziomu bez limitu; punkty w treningu się nie liczą.</p>
+  <p class="sub">Archiwum (w menu, czerwona liczba to zaległe dni) pozwala zagrać hasła z poprzednich dni. Punkty liczą się do dnia, którego dotyczą.</p>
+  <div class="actions"><button class="main" id="aClose">Gramy</button></div><p class="sub" style="text-align:center">Literiada · wersja 12 · 2026-11-11</p>`);
 }
 function saveDay(){const k=curKey();
   if(mode==='arch'){const a=store.get('sd2_arch',{});day.late=true;a[k]=day;store.set('sd2_arch',a)}else store.set('sd2_day',day);
@@ -628,7 +689,9 @@ function showArchive(){
 // ---- Weekendowa niespodzianka
 function startP4(){close();lvl=3;loadDayLevel();fitBoard();toast('Weekendowa niespodzianka!',1600)}
 // ---- Joker za polecenie: 1 na poziom (P2, P3, P4), odsłania jedną literę za jej wartość w punktach
-const GAME_URL='https://godlewskiradoslaw-dot.github.io/literalizator/';
+const GAME_URL='https://literiada.github.io/';
+// link do gry liczony z bieżącego adresu: działa na GitHubie, na nowym hostingu i przy teście z dysku
+const BASE=()=>{try{if(/^https?:$/.test(location.protocol))return location.origin+location.pathname;if(location.protocol==='file:')return location.href.split('#')[0]}catch(e){}return GAME_URL};
 function updJoker(){const b=$('bJoker'),st=$('jstrip');if(!b)return;
   const can=mode!=='free'&&day&&day.jk&&lvl>=1;const k=can?day.jk[lvl]:0;
   b.hidden=!can||done||k===2;b.className='jbtn'+(k===1?' have':'');
@@ -636,9 +699,9 @@ function updJoker(){const b=$('bJoker'),st=$('jstrip');if(!b)return;
   if(can&&k===2&&day.jp[lvl]!=null){st.hidden=false;st.innerHTML='Joker:'+[...answer].map((c,i)=>`<i class="${i===day.jp[lvl]?'on':''}">${i===day.jp[lvl]?c:''}</i>`).join('')}
   else st.hidden=true}
 function jokerPos(){const known=new Set();guesses.forEach(g=>g.s.forEach((x,i)=>{if(x==='hit')known.add(i)}));for(let i=0;i<5;i++)if(!known.has(i))return i;return 0}
-function shareGame(){const text='Zagraj ze mną w Literalizatora! Codziennie 3 hasła, punkty jak w Scrabble i premia za szybkość.';
-  try{if(navigator.share)return navigator.share({title:'Literalizator',text,url:GAME_URL}).catch(()=>{})}catch(e){}
-  try{navigator.clipboard.writeText(text+' '+GAME_URL)}catch(e){}return Promise.resolve('copied')}
+function shareGame(){const text='Zagraj ze mną w Literiadę! Codziennie 3 hasła, punkty jak w Scrabble i premia za szybkość.';
+  try{if(navigator.share)return navigator.share({title:'Literiada',text,url:BASE()}).catch(()=>{})}catch(e){}
+  try{navigator.clipboard.writeText(text+' '+BASE())}catch(e){}return Promise.resolve('copied')}
 function jokerClick(){if(done||busy)return;const k=day.jk[lvl];
   if(k===0){open(`<h2>${ic('joker',22)} Joker</h2><p>Joker odsłania jedną literę hasła. Kosztuje tyle punktów, ile ta litera jest warta w Scrabble: odejmę je od wyniku poziomu.</p>
     <p><b>Jokera dostajesz za polecenie gry znajomemu.</b> Możesz wziąć jednego na poziom 2, 3 i weekendową niespodziankę.</p>
@@ -646,14 +709,16 @@ function jokerClick(){if(done||busy)return;const k=day.jk[lvl];
     $('aRef').onclick=()=>{shareGame().then(r=>{day.jk[lvl]=1;saveDay();jokerUse(r==='copied')})};return}
   if(k===1)jokerUse()}
 function jokerUse(cp){const pos=jokerPos(),c=answer[pos],cost=PV[c]||0;
-  open(`<h2>${ic('joker',22)} Masz jokera!</h2>${cp?`<p class="sub">Link do gry jest w schowku: wklej go znajomemu w komunikatorze lub mailu.</p><p class="sub" style="user-select:all;word-break:break-all">${GAME_URL}</p>`:''}<p>Dziękuję za polecenie! Odsłonię literę na pozycji <b>${pos+1}</b>.</p><p>Koszt: <b>${cost} pkt</b>, odejmę je od wyniku tego poziomu.</p>
+  open(`<h2>${ic('joker',22)} Masz jokera!</h2>${cp?`<p class="sub">Link do gry jest w schowku: wklej go znajomemu w komunikatorze lub mailu.</p><p class="sub" style="user-select:all;word-break:break-all">${BASE()}</p>`:''}<p>Dziękuję za polecenie! Odsłonię literę na pozycji <b>${pos+1}</b>.</p><p>Koszt: <b>${cost} pkt</b>, odejmę je od wyniku tego poziomu.</p>
     <div class="actions"><button class="main" id="aUse">Odsłoń literę</button><button id="aClose">Zachowaj na później</button></div>`);
   $('aUse').onclick=()=>{day.jk[lvl]=2;day.jp[lvl]=pos;day.jc[lvl]=cost;saveDay();close();paint();toast('Litera nr '+(pos+1)+': '+c.toUpperCase(),2000)}}
 // ---- Pojedynek: hasło od znajomego zakodowane w linku (#p=...)
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const DKEY=[...new TextEncoder().encode('literalizator-pojedynek')];
-function duelEncode(w,f){const b=new TextEncoder().encode(JSON.stringify({w,f,t:Date.now()%1e7}));let s='';b.forEach((x,i)=>s+=String.fromCharCode(x^DKEY[i%DKEY.length]^((i*7)&255)));
+function encObj(o){const b=new TextEncoder().encode(JSON.stringify(o));let s='';b.forEach((x,i)=>s+=String.fromCharCode(x^DKEY[i%DKEY.length]^((i*7)&255)));
   return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function decObj(code){try{const s=atob(code.replace(/-/g,'+').replace(/_/g,'/'));const b=new Uint8Array([...s].map((c,i)=>c.charCodeAt(0)^DKEY[i%DKEY.length]^((i*7)&255)));return JSON.parse(new TextDecoder().decode(b))}catch(e){return null}}
+function duelEncode(w,f){return encObj({w,f,t:Date.now()%1e7})}
 function duelDecode(code){try{let s=atob(code.replace(/-/g,'+').replace(/_/g,'/'));const b=new Uint8Array([...s].map((c,i)=>c.charCodeAt(0)^DKEY[i%DKEY.length]^((i*7)&255)));
   const o=JSON.parse(new TextDecoder().decode(b));if(!o||typeof o.w!=='string'||[...o.w].length!==5||!/^[a-ząćęłńóśźż]{5}$/.test(o.w))return null;
   return {w:o.w,f:String(o.f||'Znajomy').slice(0,20)||'Znajomy'}}catch(e){return null}}
@@ -665,13 +730,13 @@ function startDuelFromHash(){const m=location.hash.match(/^#p=([A-Za-z0-9_-]+)$/
   d.code=m[1].slice(0,60);const rec=store.get('sd2_duels_in',{})[d.code]||{};
   duel=d;mode='free';answer=d.w;guesses=rec.g||[];cur='';done=!!rec.res;document.body.classList.add('duel');paint();fitBoard();
   if(rec.res){showResult(rec.res==='won',rec.pts||0);return true}
-  open(`<h2>${ic('swords',26)} Pojedynek!</h2><p style="font-size:1.1rem"><b>${esc(d.f)}</b> ma dla Ciebie zagadkę w Literalizatorze.</p><p>Odgadnij 5-literowe hasło w 6 próbach. Zielony: litera na swoim miejscu, pomarańczowy: litera jest, ale gdzie indziej, szary: brak litery.</p><div class="actions"><button class="main" id="aGo">${guesses.length?'Graj dalej':'Zagraj'}</button></div>`);
+  open(`<h2>${ic('swords',26)} Pojedynek!</h2><p style="font-size:1.1rem"><b>${esc(d.f)}</b> ma dla Ciebie zagadkę w Literiadzie.</p><p>Odgadnij 5-literowe hasło w 6 próbach. Zielony: litera na swoim miejscu, pomarańczowy: litera jest, ale gdzie indziej, szary: brak litery.</p><div class="actions"><button class="main" id="aGo">${guesses.length?'Graj dalej':'Zagraj'}</button></div>`);
   $('aGo').onclick=()=>{SFX.unlock();close()};return true}
 function showDuel(){
   const name=store.get('sd2_duel_name','');const out=store.get('sd2_duels_out',[]),inn=store.get('sd2_duels_in',{});
-  const outL=out.slice(0,15).map(x=>`<div><span><b>${esc(x.w.toUpperCase())}</b></span><span>${new Date(x.ts).toLocaleDateString('pl-PL')}</span></div>`).join('')||'<p class="sub">Jeszcze nic nie wysłano.</p>';
+  const outL=out.slice(0,15).map(x=>`<div><span><b>${esc(x.w.toUpperCase())}</b></span><span>${new Date(x.ts).toLocaleDateString('pl-PL')}${(x.r||[]).map(r=>`<span class="dres">${esc(r.n)}: ${r.res==='won'?r.tries+'. próba · '+r.pts+' pkt':'nie odgadnięte'}</span>`).join('')}</span></div>`).join('')||'<p class="sub">Jeszcze nic nie wysłano.</p>';
   const inL=Object.values(inn).sort((a,b)=>b.ts-a.ts).slice(0,15).map(x=>`<div><span>od: <b>${esc(x.f)}</b></span><span>${x.res==='won'?'odgadnięte w '+x.g.length+'. próbie':x.res==='lost'?'nie udało się':'w trakcie'}</span></div>`).join('')||'<p class="sub">Jeszcze nikt Cię nie wyzwał.</p>';
-  open(`<h2>${ic('swords',24)} Pojedynek</h2><p>Wymyśl hasło dla znajomego i wyślij mu link. Odgaduje Twoje słowo w 6 próbach, jak w grze dnia, ale bez zegara i jokerów.</p>
+  open(`<h2>${ic('swords',24)} Pojedynek</h2><p>Wymyśl hasło dla znajomego i wyślij mu link. Odgaduje Twoje słowo w 6 próbach, jak w grze dnia, ale bez zegara i jokerów. Po rozwiązaniu może odesłać Ci link z wynikiem, który zobaczysz w „Wysłanych zagadkach”.</p>
   <div class="dform"><label>Twój podpis<input id="dFrom" maxlength="20" value="${esc(name)}" placeholder="np. Radek" autocomplete="off"></label>
   <label>Hasło dla znajomego (5 liter)<input id="dWord" maxlength="5" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
   <p class="sub" id="dInfo">Wpisz słowo, sprawdzę, czy jest w słowniku.</p></div>
@@ -685,19 +750,85 @@ function showDuel(){
   wi.addEventListener('input',chk);
   $('dSend').onclick=()=>{if(!chk()){wi.focus();return}
     const f=($('dFrom').value.trim()||'Znajomy').slice(0,20),w=wi.value;store.set('sd2_duel_name',f);
-    const url=GAME_URL+'#p='+duelEncode(w,f),text=f+' wyzywa Cię na pojedynek w Literalizatorze! Odgadniesz moje hasło?';
+    const url=BASE()+'#p='+duelEncode(w,f),text=f+' wyzywa Cię na pojedynek w Literiadzie! Odgadniesz moje hasło?';
     const o=store.get('sd2_duels_out',[]);o.unshift({w,ts:Date.now()});store.set('sd2_duels_out',o.slice(0,50));
     $('dDone').innerHTML=`<div class="dlink"><b>Zagadka gotowa!</b><span class="sub" style="color:inherit">Jeśli okno wysyłania się nie otworzyło, skopiuj link i wklej go znajomemu:</span><input id="dUrl" readonly value="${esc(url)}"><button class="main" id="dCopy" style="border:0;border-radius:8px;padding:10px;font-weight:700;background:#12a150;color:#fff">Kopiuj link</button></div>`;
     $('dCopy').onclick=()=>{const i=$('dUrl');i.select();try{navigator.clipboard.writeText(text+' '+url).then(()=>{$('dCopy').textContent='Skopiowano ✓'},()=>{document.execCommand('copy');$('dCopy').textContent='Skopiowano ✓'})}catch(e){try{document.execCommand('copy');$('dCopy').textContent='Skopiowano ✓'}catch(_){}}};
     const lo=$('dOut');if(lo){if(!o.length||lo.querySelector('p'))lo.innerHTML='';lo.insertAdjacentHTML('afterbegin',`<div><span><b>${esc(w.toUpperCase())}</b></span><span>${new Date().toLocaleDateString('pl-PL')}</span></div>`)}
     wi.value='';info.className='sub';info.textContent='Możesz wymyślić kolejne hasło.';
-    try{if(navigator.share)navigator.share({title:'Pojedynek w Literalizatorze',text,url}).catch(()=>{})}catch(e){}};
+    try{if(navigator.share)navigator.share({title:'Pojedynek w Literiadzie',text,url}).catch(()=>{})}catch(e){}};
   setTimeout(()=>{(name?wi:$('dFrom')).focus()},50)}
+// ---- Pojedynek: odesłanie wyniku autorowi zagadki (#r=...)
+function sendResult(won){const n=($('rName').value.trim()||'Znajomy').slice(0,20);store.set('sd2_duel_name',n);
+  const pts=won?pointsFor(answer,guesses.length):0;
+  const url=BASE()+'#r='+encObj({w:answer,a:duel.f,n,g:guesses.map(x=>x.w),res:won?'won':'lost',pts});
+  const text=n+' odsyła wynik pojedynku w Literiadzie: '+(won?'odgadnięte w '+guesses.length+'. próbie!':'tym razem bez trafienia.')+' Otwórz link, żeby zobaczyć planszę.';
+  $('rDone').innerHTML=`<span class="sub" style="color:inherit">Jeśli okno wysyłania się nie otworzyło, skopiuj link i wklej go do: ${esc(duel.f)}</span><input id="rUrl" readonly value="${esc(url)}"><button id="rCopy" style="border:0;border-radius:8px;padding:10px;font-weight:700;background:#12a150;color:#fff;cursor:pointer">Kopiuj link</button>`;
+  $('rCopy').onclick=()=>{const i=$('rUrl');i.select();try{navigator.clipboard.writeText(text+' '+url).then(()=>{$('rCopy').textContent='Skopiowano ✓'},()=>{document.execCommand('copy');$('rCopy').textContent='Skopiowano ✓'})}catch(e){try{document.execCommand('copy');$('rCopy').textContent='Skopiowano ✓'}catch(_){}}};
+  try{if(navigator.share)navigator.share({title:'Wynik pojedynku w Literiadzie',text,url}).catch(()=>{})}catch(e){}}
+function startResultFromHash(){const m=location.hash.match(/^#r=([A-Za-z0-9_-]+)$/);if(!m)return false;clearHash();
+  const o=decObj(m[1]),ok=w=>typeof w==='string'&&/^[a-ząćęłńóśźż]{5}$/.test(w);
+  if(!o||!ok(o.w)||!Array.isArray(o.g)){toast('Ten link z wynikiem jest uszkodzony',2600);return true}
+  const g=o.g.filter(ok).slice(0,6),won=o.res==='won'&&g.length>0&&g[g.length-1]===o.w,n=String(o.n||'Znajomy').slice(0,20)||'Znajomy',pts=won?pointsFor(o.w,g.length):0;
+  const out=store.get('sd2_duels_out',[]);let it=out.find(x=>x.w===o.w);const rr={n,res:won?'won':'lost',tries:g.length,pts,ts:Date.now()};
+  if(it){it.r=(it.r||[]).filter(x=>x.n!==n);it.r.unshift(rr)}else out.unshift({w:o.w,ts:Date.now(),r:[rr]});store.set('sd2_duels_out',out.slice(0,50));
+  const mini=`<span class="mini">${g.map(w=>{const s=score(w,o.w);return `<span class="mr">${[...w].map((ch,j)=>`<i style="background:${COL[s[j]]}">${ch}</i>`).join('')}</span>`}).join('')}</span>`;
+  open(`<div class="step">Pojedynek · wynik od: ${esc(n)}</div><h2>${ic('swords',24)} ${esc(n)}: ${won?'odgadnięte!':'tym razem bez trafienia'}</h2>
+  ${won?`<div class="cel">${medal(medalKind(g.length))}<div class="msg">Hasło <span class="answer">${esc(o.w)}</span><small>${g.length}. próba · ${pts} pkt</small></div></div>`:`<p>Twoje hasło <span class="answer">${esc(o.w)}</span> okazało się za trudne: 6 prób bez trafienia.</p>`}
+  <div class="boards" style="width:auto"><div class="bl">${mini}</div></div>
+  <div class="actions"><button class="main" id="aNewD">${ic('swords',16)} Wyślij kolejną zagadkę</button><button id="aClose">Zamknij</button></div>`);
+  $('aNewD').onclick=showDuel;return true}
+// ---- Eksport i import wyników (przeprowadzka na inne urządzenie lub nowy adres)
+const MV_PRE='LITERIADA1:';
+function mvKeys(){const o={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^(sd2_|lt_)/.test(k))o[k]=localStorage.getItem(k)}}catch(e){}return o}
+function b64e(t){const b=new TextEncoder().encode(t);let s='';b.forEach(x=>s+=String.fromCharCode(x));return btoa(s)}
+function b64d(t){const s=atob(t);return new TextDecoder().decode(new Uint8Array([...s].map(c=>c.charCodeAt(0))))}
+function mvInfo(d){let h={};try{h=JSON.parse(d.sd2_hist||'{}')||{}}catch(e){}const ks=Object.keys(h);return {days:ks.length,pts:ks.reduce((s,k)=>s+(Array.isArray(h[k])?h[k].reduce((a,b)=>a+(+b||0),0):0),0)}}
+const mvCode=()=>MV_PRE+b64e(JSON.stringify({v:1,ts:Date.now(),d:mvKeys()}));
+function mvParse(t){t=String(t||'').trim();const i=t.indexOf(MV_PRE);if(i<0)return null;try{const o=JSON.parse(b64d(t.slice(i+MV_PRE.length).replace(/[^A-Za-z0-9+/=]/g,'')));return o&&o.d&&typeof o.d==='object'?o:null}catch(e){return null}}
+const dni=n=>n===1?'1 dzień':n+' dni';
+function showMove(){const me=mvInfo(mvKeys());
+  open(`<div class="step">Przenieś wyniki</div><h2>${ic('move',22)} Eksport i import wyników</h2>
+  <p>Wyniki zapisują się tylko w tej przeglądarce. Żeby przenieść je na inne urządzenie albo pod nowy adres gry, zrób eksport tutaj, a import tam.</p>
+  <div class="mvbox mv"><b>1. Eksport (tu, gdzie masz wyniki)</b><span class="sub">Tutaj: ${dni(me.days)}, razem ${me.pts} pkt.</span>
+  <div class="actions"><button class="main" id="mCopy">Kopiuj kod wyników</button><button id="mFile">Pobierz plik</button></div><div id="mOut"></div></div>
+  <div class="mvbox mv"><b>2. Import (na nowym miejscu)</b><textarea id="mIn" rows="3" placeholder="Wklej tu kod wyników (zaczyna się od LITERIADA1:)"></textarea>
+  <div class="actions"><button class="main" id="mImp">Importuj z kodu</button><button id="mLoad">Wczytaj plik</button></div><input type="file" id="mF" accept=".txt,text/plain" hidden>
+  <span class="sub" id="mInfo">Import zastąpi wyniki zapisane na tej stronie.</span></div>
+  <div class="actions"><button id="aClose">Zamknij</button></div>`);
+  $('mCopy').onclick=()=>{const c=mvCode();const show=()=>{$('mOut').innerHTML='<textarea rows="3" readonly id="mCode"></textarea><span class="sub">Zaznacz i skopiuj kod powyżej.</span>';$('mCode').value=c;$('mCode').select()};
+    try{navigator.clipboard.writeText(c).then(()=>{$('mCopy').textContent='Skopiowano ✓';toast('Kod wyników w schowku')},show)}catch(e){show()}};
+  $('mFile').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([mvCode()],{type:'text/plain'}));a.download='Literiada_wyniki_'+todayKey()+'.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}catch(e){toast('Nie udało się zapisać pliku, użyj kopiowania kodu',2600)}};
+  $('mLoad').onclick=()=>$('mF').click();
+  $('mF').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('mIn').value=String(r.result||'');mvAsk()};r.readAsText(f)};
+  $('mImp').onclick=mvAsk}
+function mvAsk(){const o=mvParse($('mIn').value);const inf=$('mInfo');
+  if(!o){inf.className='dbad';inf.textContent='To nie wygląda na kod wyników Literiady. Sprawdź, czy skopiowałeś całość.';return}
+  const nw=mvInfo(o.d),me=mvInfo(mvKeys());
+  open(`<h2>Zaimportować wyniki?</h2><p>W kodzie: <b>${dni(nw.days)}, ${nw.pts} pkt</b>${o.ts?' (eksport z '+new Date(o.ts).toLocaleDateString('pl-PL')+')':''}.</p>
+  ${me.days?`<p>Wyniki zapisane teraz na tej stronie (${dni(me.days)}, ${me.pts} pkt) zostaną zastąpione.</p>`:'<p>Na tej stronie nie ma jeszcze wyników.</p>'}
+  <div class="actions"><button class="main" id="mYes">Tak, importuj</button><button id="mNo">Anuluj</button></div>`);
+  $('mNo').onclick=showMove;
+  $('mYes').onclick=()=>{try{Object.keys(mvKeys()).forEach(k=>localStorage.removeItem(k));for(const k in o.d)if(/^(sd2_|lt_)/.test(k)&&typeof o.d[k]==='string')localStorage.setItem(k,o.d[k]);localStorage.setItem('sd2_seen','true');localStorage.setItem('sd2_hint_menu','true')}catch(e){toast('Nie udało się zapisać wyników',2600);return}
+    close();setMode('day');toast('Wyniki zaimportowane: '+dni(nw.days)+', '+nw.pts+' pkt',2600)}}
+// ---- Panel boczny (menu)
+const mqWide=window.matchMedia?matchMedia('(min-width:1100px)'):{matches:false};
+const isWide=()=>mqWide.matches;
+function sideSet(on,save){document.body.classList.toggle('side-on',on);$('sideBg').hidden=!on||isWide();$('bMenu').setAttribute('aria-expanded',String(on));
+  if(save&&isWide())store.set('sd2_side',on);updBadge();setTimeout(fitBoard,260)}
+function sideGo(fn){return()=>{if(!isWide())sideSet(false);fn()}}
+function menuHint(){if(store.get('sd2_hint_menu',false)||!$('ov').hidden)return;store.set('sd2_hint_menu',true);
+  if(document.body.classList.contains('side-on'))return;
+  const b=$('bMenu').getBoundingClientRect(),h=document.createElement('div');h.className='hint';h.setAttribute('role','status');
+  h.innerHTML='Nowość: tu jest menu z archiwum, wynikami, pojedynkami i treningiem.';h.style.top=(b.bottom+10)+'px';h.style.left=Math.max(8,b.left)+'px';
+  const rm=()=>h.remove();h.onclick=rm;$('bMenu').addEventListener('click',rm,{once:true});document.body.appendChild(h);setTimeout(rm,9000)}
+function showTrain(){open(`<div class="step">Trening</div><h2>${ic('train',22)} Trening</h2>${trainPicker()}<div class="actions"><button id="aClose">Zamknij</button></div>`);bindTrain()}
 function newFree(){const pool=L[freeLvl];let a;do{a=pool[Math.floor(Math.random()*pool.length)]}while(a===answer);answer=a;guesses=[];cur='';done=false;paint();fitBoard()}
 function setMode(m){mode=m;close();endDuel();
   if(m==='day'){loadDay();loadDayLevel()}else{freeLvl=lvl;newFree()}}
 
 document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.body.classList.contains('side-on')&&!isWide()){sideSet(false);return}
   if(!$('ov').hidden){if(e.key==='Escape')close();return}
   if(e.ctrlKey||e.metaKey)return;
   if(e.key==='Enter'){e.preventDefault();press('ENTER')}
@@ -705,15 +836,24 @@ document.addEventListener('keydown',e=>{
   else if(e.key.length===1)press(e.key.toLowerCase());
 });
 $('ov').addEventListener('click',e=>{if(e.target.id==='ov')close()});
-$('bArch').innerHTML=ic('cal',20)+'<span class="lbl">Archiwum</span><span class="badge" id="arBadge" hidden></span>';
-$('bDuel').innerHTML=ic('swords',20)+'<span class="lbl">Pojedynek</span>';$('bDuel').onclick=showDuel;
-$('bHelp').onclick=showHelp;$('bJoker').onclick=jokerClick;$('bArch').onclick=showArchive;$('bSnd').onclick=()=>{SFX.unlock();SFX.toggle();sndIcon()};sndIcon();$('bStats').onclick=()=>{if(mode!=='day'){setMode('day');toast('Wracasz do haseł dnia')}else showStats()};
+$('bMenu').innerHTML=ic('menu',22)+'<span class="mdot" id="mDot" hidden></span>';$('bMenu').onclick=()=>sideSet(!document.body.classList.contains('side-on'),true);
+$('sClose').innerHTML=ic('back',20);$('sClose').onclick=()=>sideSet(false,true);$('sideBg').onclick=()=>sideSet(false);$('sLogo').innerHTML=brandT();
+$('sStats').innerHTML=ic('chart',20)+'Podsumowanie i wyniki';$('sStats').onclick=sideGo(()=>{if(mode==='free')setMode('day');showStats()});
+$('sArch').innerHTML=ic('cal',20)+'Archiwum<span class="badge" id="arBadge" hidden></span>';$('sArch').onclick=sideGo(showArchive);
+$('sDuel').innerHTML=ic('swords',20)+'Pojedynek';$('sDuel').onclick=sideGo(showDuel);
+$('sTrain').innerHTML=ic('train',20)+'Trening';$('sTrain').onclick=sideGo(showTrain);
+$('sHelp').innerHTML=ic('help',20)+'Jak grać';$('sHelp').onclick=sideGo(showHelp);
+$('sMove').innerHTML=ic('move',20)+'Przenieś wyniki';$('sMove').onclick=sideGo(showMove);
+if(mqWide.addEventListener)mqWide.addEventListener('change',()=>sideSet(isWide()&&store.get('sd2_side',true)));
+if(isWide()&&store.get('sd2_side',true))sideSet(true);
+$('bJoker').onclick=jokerClick;$('bSnd').onclick=()=>{SFX.unlock();SFX.toggle();sndIcon()};sndIcon();$('bStats').onclick=()=>{setMode('day');toast('Wracasz do haseł dnia')};
 buildBoard();buildKb();loadDay();loadDayLevel();fitBoard();addEventListener('resize',fitBoard);if(window.visualViewport)visualViewport.addEventListener('resize',fitBoard);setTimeout(fitBoard,300);
 updBadge();
-if(startDuelFromHash()){store.set('sd2_seen',true)}
+if(startDuelFromHash()||startResultFromHash()){store.set('sd2_seen',true)}
 else if(!store.get('sd2_seen',false)){store.set('sd2_seen',true);showHelp()}
 else if(done3(day)&&lvl!==3)showStats();
-addEventListener('hashchange',()=>{if(/^#p=/.test(location.hash)){close();startDuelFromHash()}});
+else setTimeout(menuHint,800);
+addEventListener('hashchange',()=>{if(/^#p=/.test(location.hash)){close();startDuelFromHash()}else if(/^#r=/.test(location.hash)){close();startResultFromHash()}});
 </script>
 
 </body>
